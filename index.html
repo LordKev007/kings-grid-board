@@ -1,0 +1,558 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>King’s Grid • Shared Table</title><style>:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#e6e8e9;background:#141c23;font-size:14px;--gold:#d4b477;--line:#35414b;--cell:30px}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,.filebutton{border:1px solid #46535d;border-radius:7px;background:#29353f;color:#eef1f2;padding:9px 12px;cursor:pointer;transition:background .15s}button:hover,.filebutton:hover{background:#3a4a56}button:disabled{opacity:.45;cursor:not-allowed}button.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}button.primary{background:var(--gold);border-color:var(--gold);color:#1c252c;font-weight:700}button.secondary{border-color:var(--gold);color:var(--gold)}input,select{width:100%;border:1px solid #46535d;border-radius:6px;background:#1b262f;color:#eef1f2;padding:10px;min-width:0}label{display:grid;gap:7px;color:#b9c3ca;font-size:12px}input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}header{height:90px;display:flex;align-items:center;padding:18px 32px;border-bottom:1px solid var(--line);gap:25px}.brand{display:flex;align-items:center;gap:13px}.crown{color:var(--gold);font-size:40px}h1{font:30px Georgia,serif;margin:0 0 4px}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--gold)}small{letter-spacing:0;color:#8394a0;margin-left:6px}#roomInfo{margin-left:auto;color:#a8b5bf;font-size:13px}h2{font:60px/1.08 Georgia,serif;margin:24px 0;color:#f0e4ce}h3{font:28px Georgia,serif;margin:0 0 20px}h4{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#a6b4bf}.muted{font-size:12px;color:#91a1ad;line-height:1.5}#welcome{display:grid;grid-template-columns:1.3fr 1fr;max-width:1050px;margin:52px auto;gap:80px;padding:0 24px}.intro>p{line-height:1.8;color:#aebac4}.joincard{background:#202c35;padding:28px;border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px #0003}.joincard>button{width:100%;margin-top:12px}.joincard label{margin-top:14px}.choose{display:flex;gap:35px}.choose label{display:flex;align-items:center;font-size:15px}.choose input{width:auto}.redtext{color:#fa9992!important}.bluetext{color:#91bfff!important}.divider{color:#718490;letter-spacing:2px;font-size:10px;text-align:center;margin:25px 0 12px}.mini-grid{margin:28px 0;width:270px;height:135px;border:1px solid #586567;background-color:#d9ccb4;background-image:linear-gradient(#8f9f9e80 1px,transparent 1px),linear-gradient(90deg,#8f9f9e80 1px,transparent 1px);background-size:45px 45px;display:flex;gap:50px;align-items:center;justify-content:center;transform:rotate(-3deg);border-radius:5px;box-shadow:0 14px 35px #0004}.mini-grid span{background:#263039;color:#ff9c94;font:30px Georgia;padding:3px;border-radius:3px}.mini-grid span:nth-child(2){color:#94bbff}#setupError{color:#ffb8a8;line-height:1.4}.toolbar{display:flex;align-items:center;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}.toolbar button{font-size:12px}.spacer{flex:1}#connection{font-size:12px;color:#a4dfbd;margin-right:8px}#connection.offline{color:#ffd18d}.workspace{display:grid;grid-template-columns:240px minmax(0,1fr);height:calc(100vh - 154px)}aside{padding:15px;border-right:1px solid var(--line);overflow-y:auto;background:#1b252e}.tabbar{display:flex;gap:6px}.tabbar button{flex:1;font-size:12px}.teamchoices{display:flex;gap:4px;margin:10px 0}.teamchoices button{flex:1;padding:8px 3px;font-size:12px}#search{margin-bottom:12px}#catalog{display:grid;grid-template-columns:1fr 1fr;gap:6px}.catalog-piece{display:flex;align-items:center;gap:7px;text-align:left;font-size:11px;padding:8px 5px;min-height:40px}.catalog-piece .icon{font-size:19px;min-width:23px;text-align:center}#sizeFields{display:flex;gap:10px;margin:14px 0}#sizeFields label{flex:1}#addReserve{width:100%;font-size:11px}#reserves{display:flex;flex-wrap:wrap;gap:5px}#reserves button{font-size:11px;padding:7px}.tools{margin-top:25px;border-top:1px solid var(--line);padding-top:15px}.tools summary{cursor:pointer;color:#c5cdd3;font-size:12px}.tools button,.filebutton{display:block;width:100%;text-align:center;font-size:12px;margin-top:10px}.danger{color:#ffaca5}#log p{font-size:12px;line-height:1.5;border-bottom:1px solid var(--line);padding:10px 0}#log time{display:block;font-size:10px;color:#82939f}.boardsection{display:flex;flex-direction:column;min-width:0;min-height:0;padding:0 20px 12px}#hint{padding:12px 0;color:#c8d2d8;font-size:12px;min-height:39px}#viewport{flex:1;min-height:180px;overflow:auto;position:relative;background:#10181f;border:1px solid #394650;border-radius:9px;padding:14px}#board{position:relative;width:calc(var(--cell)*32);height:calc(var(--cell)*22);margin:auto;user-select:none}.cell{position:absolute;border-radius:0;border:0;border-right:1px solid #87959780;border-bottom:1px solid #87959780;background:#e0d6bf;padding:0;color:#33424b;font-size:10px;width:var(--cell);height:var(--cell)}.cell:hover{background:#efdfa9}.cell.alt{background:#dbd0b9}.cell.alt:hover{background:#efdfa9}.axis{position:absolute;display:grid;place-items:center;color:#90a1ad;font-size:10px;width:var(--cell);height:var(--cell)}.piece{position:absolute;pointer-events:none;border-radius:4px;border:2px solid #e8857e;background:#593437;color:#ffd7d0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 3px #0005;z-index:2}.piece.blue{border-color:#76a8e6;background:#273f59;color:#d2e6ff}.piece.neutral{border-color:#ae9a78;background:#554e40;color:#f2e5c6}.piece.selected{outline:3px solid #ffe19d;outline-offset:1px;z-index:5}.piece.defeated{filter:grayscale(.9);opacity:.7}.piece.captured{border-style:dashed}.piece .glyph{font-size:calc(var(--cell)*.49);line-height:1}.piece .tiny{font-size:clamp(6px,calc(var(--cell)*.2),12px);line-height:1.2;max-width:95%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.piece .statusMark{position:absolute;right:1px;top:0;font-size:10px;color:white}.stackbadge{position:absolute;right:1px;bottom:1px;font-size:9px;background:#e2bd70;color:#17242d;border-radius:3px;padding:0 2px}.boardfooter{display:flex;justify-content:space-between;gap:15px;padding:10px 0;font-size:10px;color:#93a5b2}#selection{background:#24313c;border:1px solid #50606b;border-radius:9px;padding:12px}#selectedCoord{color:#9faeb8;margin-left:15px;font-size:12px}.editrow{display:flex;align-items:end;gap:7px;flex-wrap:wrap;margin-top:10px}.editrow label:first-child{flex:1;min-width:90px}.editrow label{max-width:170px}.editrow button,.editrow input,.editrow select{padding:7px;font-size:12px}#stack{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}#stack button{font-size:11px;padding:5px}#toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);max-width:650px;padding:14px 20px;border:1px solid var(--gold);background:#283640;border-radius:8px;box-shadow:0 10px 50px #0007;z-index:30;color:#fff}[hidden]{display:none!important}@media(max-width:850px){header{padding:12px 18px}h1{font-size:24px}#welcome{gap:24px;margin:25px auto}h2{font-size:42px}.workspace{grid-template-columns:190px 1fr}.boardsection{padding:0 8px 10px}aside{padding:10px}.toolbar{padding:8px}#roomInfo{font-size:10px}#resume{display:none}}@media(max-width:600px){#welcome{grid-template-columns:1fr}.intro h2{font-size:38px}.mini-grid{display:none}.workspace{height:auto;grid-template-columns:150px minmax(0,1fr)}#catalog{grid-template-columns:1fr}#viewport{height:65vh;flex:none}.boardfooter span:last-child{display:none}header{height:80px}.eyebrow{letter-spacing:1px}#roomInfo{max-width:100px}}
+#catalog{display:flex;flex-direction:column;gap:12px}.catalog-row>span{font-size:11px;color:#bfcbd4;display:block;margin-bottom:5px}.token-row{display:flex;gap:7px}.tray-token{width:54px;height:54px;padding:2px;border-radius:5px;cursor:grab;position:relative}.tray-token.used{opacity:.45}.tray-token.used:after{content:'✓';position:absolute;bottom:0;right:1px;color:white;background:#233b31}.token-art{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}.piece{pointer-events:auto;cursor:grab;padding:0}.piece .token-art{object-fit:contain}.piece .placeholder{font-size:calc(var(--cell)*.4);line-height:1}.piece.cannon-object{border:2px solid #dabc78;background:repeating-linear-gradient(45deg,#493c2e,#493c2e 4px,#5b4934 4px,#5b4934 8px);color:#fff1bf}.piece.cannon-object .placeholder{font-size:calc(var(--cell)*.21);font-weight:900}.tray-token .placeholder{font-size:13px}.orientation{margin:15px 0}.board-ping{pointer-events:none;position:absolute;width:10px;height:10px;border:3px solid #ff8d87;border-radius:50%;z-index:20;transform:translate(-50%,-50%);animation:ripple 1.4s ease-out forwards;box-shadow:0 0 0 2px #fff7}.board-ping.blue{border-color:#76b9ff}.drag-preview{position:absolute;pointer-events:none;border:2px dashed #ffb0aa;background:#f7877733;z-index:15;font-size:9px;color:white;display:grid;place-items:center}.drag-preview.blue{border-color:#83bcff;background:#83bcff33}@keyframes ripple{0%{width:10px;height:10px;opacity:1}100%{width:110px;height:110px;opacity:0}}#turnLabel{font-size:12px;color:#e7c78c}.toolbar{min-height:65px}.workspace{height:calc(100vh - 170px)}@media(prefers-reduced-motion:reduce){.board-ping{animation:none;width:40px;height:40px}}
+
+.piece.fixed-base{border:2px solid rgba(255,255,255,.85);color:#fff;background:#bd514d;cursor:default}.piece.fixed-base.blue{background:#4c82bd}.piece.fixed-giving{border:2px solid rgba(255,255,255,.85);background:#3b9b5e;color:#fff;cursor:default}.fixed-label{font-weight:900;font-size:calc(var(--cell)*.42);line-height:1;text-shadow:0 1px 2px #0008}
+.ruler-controls{display:flex;align-items:center;gap:7px}.ruler-controls label{display:flex;align-items:center;gap:4px;color:#b9c3ca;font-size:11px}.ruler-controls input,.ruler-controls select{width:64px;padding:6px;font-size:11px}.ruler-controls select{width:94px}.ruler-cell{position:absolute;z-index:1;pointer-events:none;background:#f1c75b38;border:1px solid #f1c75b99;box-shadow:inset 0 0 0 1px #fff2}
+</style></head><body>
+<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.6</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="leave" hidden>Leave table</button></header>
+<main id="welcome"><section class="intro"><div class="eyebrow">PULL UP A CHAIR</div><h2>Same board.<br>Different places.</h2><p>Move the pieces here. Keep your units on your iPads.<br>Bring your own voice call and settle in for a game.</p><div class="mini-grid"><span>♛</span><span>♞</span><span>⚔</span></div><button id="local" class="secondary">Try the board on this computer</button><p class="muted">Local practice is saved only in this browser.</p></section><section class="joincard"><h3>Your table</h3><label>Board server URL<input id="api" type="url" placeholder="https://kings-grid-board.…workers.dev" autocomplete="url"></label><p class="muted">Use the new board Worker’s URL from Cloudflare.</p><label>Your name<input id="name" maxlength="30" placeholder="Kevin or Bubs" autocomplete="given-name"></label><div class="choose"><label><input type="radio" name="team" value="red"> <b class="redtext">Red</b></label><label><input type="radio" name="team" value="blue"> <b class="bluetext">Blue</b></label></div><button id="create" class="primary">Create a table</button><div class="divider">OR JOIN A TABLE</div><label>Room code<input id="code" maxlength="8" placeholder="8-character code" autocapitalize="characters"></label><button id="join">Join / resume table</button><p id="setupError" role="alert"></p></section></main>
+<main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><button id="flip">Flip view</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
+const CATALOG = [
+  {
+    "id": "unit1",
+    "name": "King",
+    "icon": "♛",
+    "short": "King",
+    "kind": "unit",
+    "art": {}
+  },
+  {
+    "id": "unit2",
+    "name": "Base Builder",
+    "icon": "⌂",
+    "short": "Builder",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit2-red-1.png",
+      "red2": "assets/unit2-red-2.png",
+      "red3": "assets/unit2-red-3.png",
+      "blue1": "assets/unit2-blue-1.png",
+      "blue2": "assets/unit2-blue-2.png",
+      "blue3": "assets/unit2-blue-3.png"
+    }
+  },
+  {
+    "id": "unit3",
+    "name": "Wood Worker",
+    "icon": "🪵",
+    "short": "Wood",
+    "kind": "unit",
+    "art": {
+      "red3": "assets/unit3-red-3.png"
+    }
+  },
+  {
+    "id": "unit4",
+    "name": "Stone Worker",
+    "icon": "🪨",
+    "short": "Stone",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit4-red-1.png",
+      "red2": "assets/unit4-red-2.png",
+      "red3": "assets/unit4-red-3.png",
+      "blue1": "assets/unit4-blue-1.png",
+      "blue2": "assets/unit4-blue-2.png",
+      "blue3": "assets/unit4-blue-3.png"
+    }
+  },
+  {
+    "id": "unit5",
+    "name": "Iron Worker",
+    "icon": "⚙",
+    "short": "Iron",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit5-red-1.png",
+      "red2": "assets/unit5-red-2.png",
+      "red3": "assets/unit5-red-3.png",
+      "blue1": "assets/unit5-blue-1.png",
+      "blue2": "assets/unit5-blue-2.png",
+      "blue3": "assets/unit5-blue-3.png"
+    }
+  },
+  {
+    "id": "unit6",
+    "name": "Warrior (Sword)",
+    "icon": "⚔",
+    "short": "Sword",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit6-red-1.png",
+      "red3": "assets/unit6-red-3.png"
+    }
+  },
+  {
+    "id": "unit7",
+    "name": "Warrior (Spear)",
+    "icon": "🔱",
+    "short": "Spear",
+    "kind": "unit",
+    "art": {}
+  },
+  {
+    "id": "unit8",
+    "name": "Warrior (Bow)",
+    "icon": "🏹",
+    "short": "Bow",
+    "kind": "unit",
+    "art": {
+      "red3": "assets/unit8-red-3.png",
+      "blue2": "assets/unit8-blue-2.png",
+      "blue3": "assets/unit8-blue-3.png"
+    }
+  },
+  {
+    "id": "unit9",
+    "name": "Warrior (Lance & Horse)",
+    "icon": "♞",
+    "short": "Lance",
+    "kind": "unit",
+    "art": {}
+  },
+  {
+    "id": "unit10",
+    "name": "Mage",
+    "icon": "✦",
+    "short": "Mage",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit10-red-1.png",
+      "red2": "assets/unit10-red-2.png",
+      "red3": "assets/unit10-red-3.png",
+      "blue1": "assets/unit10-blue-1.png",
+      "blue2": "assets/unit10-blue-2.png",
+      "blue3": "assets/unit10-blue-3.png"
+    }
+  },
+  {
+    "id": "unit11",
+    "name": "Priest",
+    "icon": "☀",
+    "short": "Priest",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit11-red-1.png",
+      "red2": "assets/unit11-red-2.png",
+      "red3": "assets/unit11-red-3.png",
+      "blue1": "assets/unit11-blue-1.png",
+      "blue2": "assets/unit11-blue-2.png",
+      "blue3": "assets/unit11-blue-3.png"
+    }
+  },
+  {
+    "id": "unit12",
+    "name": "Medic",
+    "icon": "✚",
+    "short": "Medic",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit12-red-1.png",
+      "red2": "assets/unit12-red-2.png",
+      "red3": "assets/unit12-red-3.png",
+      "blue1": "assets/unit12-blue-1.png",
+      "blue2": "assets/unit12-blue-2.png",
+      "blue3": "assets/unit12-blue-3.png"
+    }
+  },
+  {
+    "id": "unit13",
+    "name": "Necromancer",
+    "icon": "☠",
+    "short": "Necro",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit13-red-1.png",
+      "red2": "assets/unit13-red-2.png",
+      "red3": "assets/unit13-red-3.png",
+      "blue1": "assets/unit13-blue-1.png",
+      "blue2": "assets/unit13-blue-2.png",
+      "blue3": "assets/unit13-blue-3.png"
+    }
+  },
+  {
+    "id": "unit14",
+    "name": "Farmer",
+    "icon": "🌾",
+    "short": "Farmer",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit14-red-1.png",
+      "red2": "assets/unit14-red-2.png",
+      "red3": "assets/unit14-red-3.png",
+      "blue1": "assets/unit14-blue-1.png",
+      "blue2": "assets/unit14-blue-2.png",
+      "blue3": "assets/unit14-blue-3.png"
+    }
+  },
+  {
+    "id": "unit15",
+    "name": "Artillerist",
+    "icon": "💣",
+    "short": "Artill.",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit15-red-1.png",
+      "red2": "assets/unit15-red-2.png",
+      "red3": "assets/unit15-red-3.png",
+      "blue1": "assets/unit15-blue-1.png",
+      "blue2": "assets/unit15-blue-2.png",
+      "blue3": "assets/unit15-blue-3.png"
+    }
+  },
+  {
+    "id": "unit16",
+    "name": "Mechanist",
+    "icon": "🔧",
+    "short": "Mech.",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit16-red-1.png",
+      "red2": "assets/unit16-red-2.png",
+      "red3": "assets/unit16-red-3.png",
+      "blue1": "assets/unit16-blue-1.png",
+      "blue2": "assets/unit16-blue-2.png",
+      "blue3": "assets/unit16-blue-3.png"
+    }
+  },
+  {
+    "id": "unit17",
+    "name": "Oracle",
+    "icon": "◉",
+    "short": "Oracle",
+    "kind": "unit",
+    "art": {}
+  },
+  {
+    "id": "unit18",
+    "name": "Thief",
+    "icon": "◇",
+    "short": "Thief",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit18-red-1.png",
+      "red2": "assets/unit18-red-2.png",
+      "red3": "assets/unit18-red-3.png",
+      "blue1": "assets/unit18-blue-1.png",
+      "blue2": "assets/unit18-blue-2.png",
+      "blue3": "assets/unit18-blue-3.png"
+    }
+  },
+  {
+    "id": "unit19",
+    "name": "Strategist",
+    "icon": "♟",
+    "short": "Strat.",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit19-red-1.png",
+      "red2": "assets/unit19-red-2.png",
+      "red3": "assets/unit19-red-3.png",
+      "blue1": "assets/unit19-blue-1.png",
+      "blue3": "assets/unit19-blue-3.png"
+    }
+  },
+  {
+    "id": "unit20",
+    "name": "Shopkeeper",
+    "icon": "💰",
+    "short": "Shop",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/unit20-red-1.png",
+      "red2": "assets/unit20-red-2.png",
+      "red3": "assets/unit20-red-3.png",
+      "blue1": "assets/unit20-blue-1.png",
+      "blue2": "assets/unit20-blue-2.png",
+      "blue3": "assets/unit20-blue-3.png"
+    }
+  },
+  {
+    "id": "ritual",
+    "name": "Ritual Caster",
+    "short": "Ritual",
+    "icon": "✧",
+    "kind": "unit",
+    "art": {
+      "red1": "assets/ritual-red-1.png",
+      "red2": "assets/ritual-red-2.png",
+      "red3": "assets/ritual-red-3.png",
+      "blue1": "assets/ritual-blue-1.png",
+      "blue2": "assets/ritual-blue-2.png",
+      "blue3": "assets/ritual-blue-3.png"
+    }
+  },
+  {
+    "id": "base",
+    "name": "Base",
+    "icon": "⌂",
+    "short": "Base",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "giving",
+    "name": "Giving Tile",
+    "icon": "✧",
+    "short": "Giving",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "cannon",
+    "name": "Cannon",
+    "icon": "●",
+    "short": "Cannon",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "woodwall",
+    "name": "Wood Wall",
+    "icon": "▥",
+    "short": "Wood wall",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "stonewall",
+    "name": "Stone Wall",
+    "icon": "▦",
+    "short": "Stone wall",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "ironwall",
+    "name": "Iron Wall",
+    "icon": "▤",
+    "short": "Iron wall",
+    "kind": "marker",
+    "art": {}
+  },
+  {
+    "id": "marker",
+    "name": "Custom Marker",
+    "icon": "◆",
+    "short": "Marker",
+    "kind": "marker",
+    "art": {}
+  }
+];
+
+const WIDTH=31,HEIGHT=21;
+const types=new Set(CATALOG.map(x=>x.id));
+const copy=x=>JSON.parse(JSON.stringify(x));
+function emptyBoard(){return {width:WIDTH,height:HEIGHT,pieces:[
+ {id:'fixed-base-red',type:'base',team:'red',label:'B',x:1,y:10,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-base-blue',type:'base',team:'blue',label:'B',x:29,y:10,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-gt-1',type:'giving',team:'neutral',label:'GT',x:30,y:0,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-gt-2',type:'giving',team:'neutral',label:'GT',x:10,y:1,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-gt-3',type:'giving',team:'neutral',label:'GT',x:15,y:10,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-gt-4',type:'giving',team:'neutral',label:'GT',x:20,y:19,w:1,h:1,status:'normal',copyNo:1,fixed:true},
+ {id:'fixed-gt-5',type:'giving',team:'neutral',label:'GT',x:0,y:20,w:1,h:1,status:'normal',copyNo:1,fixed:true}
+],nextNumber:1};}
+function validateBoard(b){
+ if(!b||b.width!==WIDTH||b.height!==HEIGHT||!Array.isArray(b.pieces)||b.pieces.length>500)throw Error('Expected a 31 × 21 board with at most 500 pieces.');
+ const ids=new Set();
+ for(const p of b.pieces){
+  if(!p||typeof p.id!=='string'||p.id.length>80||ids.has(p.id)||!types.has(p.type))throw Error('Invalid or duplicate piece.');ids.add(p.id);
+  if(!['red','blue','neutral'].includes(p.team)||!['normal','defeated','captured'].includes(p.status))throw Error('Invalid piece colour or status.');
+  if(!Number.isInteger(p.copyNo)||p.copyNo<1||p.copyNo>99)throw Error('Invalid piece number.');
+  if(p.fixed!==undefined&&!Boolean(p.fixed))throw Error('Invalid fixed marker.');
+  if(['woodwall','stonewall','ironwall'].includes(p.type)&&!((p.w===5&&p.h===1)||(p.w===1&&p.h===5)))throw Error('Walls must be exactly five squares, horizontal or vertical.');
+  if(typeof p.label!=='string'||p.label.length>40)throw Error('Piece labels must be 40 characters or fewer.');
+  if(!Number.isInteger(p.w)||!Number.isInteger(p.h)||p.w<1||p.h<1||p.w>5||p.h>5)throw Error('Piece dimensions must be 1–5 squares.');
+  if(p.x!==null||p.y!==null){if(!Number.isInteger(p.x)||!Number.isInteger(p.y)||p.x<0||p.y<0||p.x+p.w>WIDTH||p.y+p.h>HEIGHT)throw Error('That piece would extend past the board.');}
+ }
+ if(!Number.isInteger(b.nextNumber)||b.nextNumber<1||b.nextNumber>1000000)throw Error('Invalid piece counter.');
+ return b;
+}
+function changeBoard(original,action){
+ const b=copy(original);let description='Board updated';
+ const find=()=>{const p=b.pieces.find(p=>p.id===action.id);if(!p)throw Error('Piece no longer exists.');if(p.fixed)throw Error('The fixed board markers cannot be moved.');return p;};
+ switch(action.kind){
+ case 'add': {
+  const t=CATALOG.find(t=>t.id===action.type);if(!t)throw Error('Unknown piece type.');
+  const p={id:action.id,type:t.id,team:action.team,label:action.label||`${t.short} ${action.copyNo??1}`,x:action.x??null,y:action.y??null,w:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?1:5):1,h:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?5:1):1,status:'normal',copyNo:action.copyNo??1};
+  b.nextNumber++;b.pieces.push(p);description=`Added ${p.label}`;break;
+ }
+ case 'move': {const p=find();p.x=action.x;p.y=action.y;description=`Moved ${p.label}${p.x===null?' to reserve':` to ${coord(p.x,p.y)}`}`;break;}
+ case 'edit': {const p=find();for(const k of ['label','team','status'])if(action[k]!==undefined)p[k]=action[k];description=`Updated ${p.label}`;break;}
+ case 'rotate': {const p=find();[p.w,p.h]=[p.h,p.w];description=`Rotated ${p.label}`;break;}
+ case 'remove': {description=`Removed ${find().label}`;b.pieces=b.pieces.filter(p=>p.id!==action.id);break;}
+ case 'clear': b.pieces=[];b.nextNumber=1;description='Cleared the board';break;
+ case 'import': return {board:copy(validateBoard(action.board)),description:'Loaded a saved board'};
+ default:throw Error('Unknown board action.');
+ }
+ validateBoard(b);return {board:b,description};
+}
+function coord(x,y){return `${x<26?String.fromCharCode(65+x):'A'+String.fromCharCode(65+x-26)}${y+1}`;}
+
+const other=t=>t==='red'?'blue':'red';
+function newRoom(code,name,team,token,first){return {code,board:emptyBoard(),players:[{name,team,token}],phase:'setup',ready:{red:false,blue:false},first:first||team,turn:first||team,revision:0,undo:{red:[],blue:[]},log:[],requests:[],tickets:[]};}
+function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup'){board.pieces=board.pieces.filter(p=>p.fixed||p.team===team);board.nextNumber=1;}return {code:r.code,board,players:r.players.map(({name,team})=>({name,team})),phase:r.phase,ready:r.ready,turn:r.turn,first:r.first,revision:r.revision,canUndo:r.undo[team].length>0,history:r.log.filter(l=>r.phase==='play'||l.team===team),myTeam:team};}
+function applyAction(r,team,a){
+ let description='';
+ if(a.kind==='reset'){
+  r.board=emptyBoard();r.phase='setup';r.ready={red:false,blue:false};r.turn=r.first;r.undo={red:[],blue:[]};r.log=[];description='Reset the table for a new setup';
+ }else if(a.kind==='ready'){
+  if(r.phase!=='setup')throw Error('Setup has already finished.');r.ready[team]=!r.ready[team];
+  if(r.players.length===2&&r.ready.red&&r.ready.blue){r.phase='play';r.turn=r.first;r.undo={red:[],blue:[]};r.log=[];description='Both players ready — armies revealed';}
+  else description=r.ready[team]?'Ready for reveal':'Resumed private setup';
+ }else if(a.kind==='pass'){
+  throw Error('Pass Turn is no longer used after setup. Both players may move pieces.');
+ }else{
+  if(r.phase==='setup'&&r.ready[team])throw Error('Click Not ready to change your setup.');
+  // After setup, both players may move any non-wall piece. The board does not enforce turns.
+  if(a.kind==='undo'){
+   const last=r.undo[team].pop();if(!last)throw Error('Nothing to undo.');
+   if(r.phase==='setup')r.board.pieces=[...r.board.pieces.filter(p=>p.fixed||p.team!==team),...last.pieces.filter(p=>!p.fixed)];else {r.board=last;r.undo[other(team)]=[];}description='Undid last edit';
+  }else{
+   const piece=r.board.pieces.find(p=>p.id===a.id);
+   if(['edit','rotate','remove'].includes(a.kind)&&(!piece||piece.team!==team))throw Error('Select one of your own pieces.');
+   if(a.kind==='move'&&(!piece||piece.fixed))throw Error('That piece cannot be moved.');
+   if(a.kind==='move'&&r.phase==='setup'&&piece.team!==team)throw Error('Only move your own pieces during setup.');
+   if(a.kind==='move'&&piece.type.endsWith('wall'))throw Error('Walls cannot be moved.');
+   if(a.kind==='edit'&&a.team!==undefined&&a.team!==team)throw Error('Piece colours belong to their player.');
+   if(a.kind==='add'){
+    if(a.team!==team)throw Error('Place pieces from your own tray.');
+    if(r.board.pieces.some(p=>p.team===team&&p.type===a.type&&p.copyNo===a.copyNo))throw Error('That numbered piece is already placed. Select it to move it.');
+   }
+   if(a.kind==='import'&&r.phase==='setup')throw Error('Load saved games after both players are ready.');
+   const before=copy(r.board);
+   let result;
+   if(a.kind==='clear'){const b=copy(r.board);b.pieces=b.pieces.filter(p=>p.fixed||p.team!==team);result={board:b,description:'Returned all own pieces to the tray'};}
+   else result=changeBoard(r.board,a);
+   if(r.phase==='setup')before.pieces=before.pieces.filter(p=>p.fixed||p.team===team);
+   r.undo[team].push(before);r.undo[team]=r.undo[team].slice(-40);
+   while(new TextEncoder().encode(JSON.stringify(r.undo[team])).length>300000)r.undo[team].shift();
+   r.board=result.board;if(r.phase==='play')r.undo[other(team)]=[];description=result.description;
+  }
+ }
+ r.revision++;r.log.unshift({team,text:`${r.players.find(p=>p.team===team)?.name||team}: ${description}`,at:Date.now()});r.log=r.log.slice(0,60);return r;
+}
+
+const $=s=>document.querySelector(s),el=id=>document.getElementById(id),uuid=()=>crypto.randomUUID();
+const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
+const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{toast('Browser storage unavailable. Keep your private resume link and download saves.');}};
+let room=null,session=null,local=false,localState=null,team='red',selected=null,placing=null,flipped=false,cell=30,fit=true,busy=false,connected=false,pingMode=false,rulerMode=false,rulerOrigin=null,privateRuler=null,publicRuler=null;
+let socket=null,retry=null,heartbeat=null,toastTimer=null,generation=0,dragData=null,lastDrag=0,previousPositions=new Map();
+const start=new URL(location.href);el('api').value=start.searchParams.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev');el('name').value=read('kg-board-name','');el('code').value=start.searchParams.get('room')||'';
+function toast(text){el('toast').textContent=text;el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el('toast').hidden=true,6500);}
+function server(){const u=new URL(el('api').value.trim());if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))throw Error('Enter the HTTPS URL of the new board Worker.');return u.origin;}
+const key=(api,code)=>`kg-board-v2:${api}:${code}`;
+async function request(path,{body,token=session?.token,api=session?.api||server()}={}){
+ const c=new AbortController(),timer=setTimeout(()=>c.abort(),15000);
+ try{const res=await fetch(api+path,{method:body===undefined?'GET':'POST',headers:{'content-type':'application/json',...(token?{authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:c.signal});const d=await res.json();if(!res.ok){if(d.room)update(d.room);throw Error(d.error||'Request failed');}return d;}finally{clearTimeout(timer);}
+}
+async function launch(join){
+ el('setupError').textContent='';el('create').disabled=el('join').disabled=true;
+ try{const api=server(),name=el('name').value.trim()||'Player';let d;
+  if(join){const code=el('code').value.trim().toUpperCase();if(!/^[A-Z2-9]{8}$/.test(code))throw Error('Enter the 8-character room code.');const saved=read(key(api,code)),hash=new URLSearchParams(location.hash.slice(1)),privateToken=hash.get('resume');
+   if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
+   else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
+  }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.6 Worker first.');
+  local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
+ }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
+}
+el('create').onclick=()=>launch(false);el('join').onclick=()=>launch(true);
+el('local').onclick=()=>{local=true;team='red';session=null;localState=read('kg-board-v2-local');if(!localState?.phase){localState=newRoom('LOCAL','Red player','red','local-red','red');localState.players.push({name:'Blue player',team:'blue',token:'local-blue'});}connected=true;enter(publicRoom(localState,team));};
+function enter(r){room=r;selected=null;placing=null;previousPositions.clear();el('welcome').hidden=true;el('table').hidden=false;el('leave').hidden=false;el('invite').hidden=el('resume').hidden=local;el('localSwitch').hidden=!local;fit=true;render();status();requestAnimationFrame(resize);}
+function status(){el('connection').textContent=local?'● Local test · one computer':connected?'● Connected · changes saved':'● Reconnecting · editing paused';el('connection').classList.toggle('offline',!local&&!connected);}
+function stopSocket(){generation++;clearTimeout(retry);clearInterval(heartbeat);if(socket){socket.onclose=null;socket.close();socket=null;}connected=false;}
+async function connect(){stopSocket();const gen=generation;status();try{const d=await request(`/api/rooms/${session.code}/ticket`,{body:{}});if(gen!==generation)return;const u=new URL(session.api);u.protocol=u.protocol==='https:'?'wss:':'ws:';u.pathname=`/api/rooms/${session.code}/ws`;u.searchParams.set('ticket',d.ticket);socket=new WebSocket(u);
+ socket.onopen=()=>{connected=true;status();heartbeat=setInterval(()=>{if(socket?.readyState===1)socket.send('ping');},20000);};
+ socket.onmessage=e=>{if(e.data==='pong')return;try{const d=JSON.parse(e.data);if(d.room)update(d.room);if(d.ping)showPing(d.ping);if(d.drag)showDrag(d.drag);if(d.rulerClear){publicRuler=null;render();}if(d.ruler){publicRuler=d.ruler;render();}}catch{}};
+ socket.onclose=()=>{connected=false;status();clearInterval(heartbeat);retry=setTimeout(connect,2000);};socket.onerror=()=>socket?.close();
+ }catch{if(gen===generation){connected=false;status();retry=setTimeout(connect,3000);}}}
+el('leave').onclick=()=>{if(busy)return;stopSocket();room=null;session=null;el('table').hidden=true;el('welcome').hidden=false;el('leave').hidden=true;el('roomInfo').textContent='31 × 21 · Your board, your rules';};
+function update(r){if(room&&r.revision<room.revision)return;room=r;team=r.myTeam;if(r.phase==='setup'){privateRuler=null;publicRuler=null;rulerOrigin=null;}render();}
+function editable(){return room&&((room.phase==='setup'&&!room.ready[team])||room.phase==='play')&&(local||connected);}
+async function act(action){if(busy)return toast('Wait for the current edit to finish.');if(!local&&!connected)return toast('Reconnecting—editing is paused.');busy=true;
+ try{if(local){applyAction(localState,team,action);write('kg-board-v2-local',localState);update(publicRoom(localState,team));}
+ else{const payload={requestId:uuid(),revision:room.revision,action};let d;try{d=await request(`/api/rooms/${session.code}/command`,{body:payload});}catch(e){if(e.name==='AbortError'||e instanceof TypeError)d=await request(`/api/rooms/${session.code}/command`,{body:payload});else throw e;}update(d.room);}return true;
+ }catch(e){toast(e.message);return false;}finally{busy=false;}}
+el('localSwitch').onclick=()=>{team=other(team);selected=null;placing=null;previousPositions.clear();update(publicRoom(localState,team));toast(`Now viewing as ${team}. This is a local two-seat test.`);};
+el('ready').onclick=()=>{selected=null;placing=null;act({kind:'ready'});};
+function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
+const rulerButton=button('◎ Ruler',()=>{rulerMode=!rulerMode;rulerButton.classList.toggle('active',rulerMode);if(rulerMode)toast('Ruler mode: click a unit, then enter a radius.');else{rulerOrigin=null;privateRuler=null;publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));render();}},'');
+const rulerControls=document.createElement('span');rulerControls.className='ruler-controls';rulerControls.innerHTML='<label>Radius <input id="rulerRadius" type="number" min="1" max="30" value="5"></label><label>Show to <select id="rulerScope"><option value="private">Only me</option><option value="public">Both players</option></select></label>';
+document.querySelector('.toolbar').append(rulerButton,rulerControls);
+const rulerRadius=()=>Math.max(1,Math.min(30,Number.parseInt(el('rulerRadius').value,10)||1));
+function setRulerOrigin(p){if(p.fixed||p.type.endsWith('wall'))return toast('Select a unit or cannon for the ruler.');rulerOrigin=p.id;selected=p.id;const measure={id:p.id,radius:rulerRadius(),team};if(el('rulerScope').value==='public'){if(room.phase!=='play')return toast('Public rulers are available after both players are ready.');publicRuler=measure;privateRuler=null;if(local)render();else if(socket?.readyState===1)socket.send(JSON.stringify({kind:'ruler',id:p.id,radius:measure.radius}));else toast('Reconnect before sharing a ruler.');}else{if(publicRuler?.team===team){publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));}privateRuler=measure;render();}}
+el('rulerRadius').oninput=()=>{if(rulerOrigin){const p=room?.board.pieces.find(p=>p.id===rulerOrigin);if(p)setRulerOrigin(p);}};
+el('rulerScope').onchange=()=>{if(rulerOrigin){const p=room?.board.pieces.find(p=>p.id===rulerOrigin);if(p)setRulerOrigin(p);}};
+function graphic(t,colour,n){const path=t.art?.[colour+n];if(path){const im=document.createElement('img');im.src=path;im.alt=`${colour} ${t.name} ${n}`;im.draggable=false;im.className='token-art';return im;}const s=document.createElement('span');s.className='placeholder';s.textContent=t.id==='cannon'?'CANNON':`${t.icon} ${n}`;s.title=`${t.name} ${n} — placeholder`;return s;}
+function renderCatalog(){el('ownTeam').textContent=`${team.toUpperCase()} PIECES`;el('ownTeam').className='teamchoices '+team+'text';const list=el('catalog');list.replaceChildren();const q=el('search').value.toLowerCase();
+ for(const t of CATALOG.filter(t=>!['base','giving'].includes(t.id)&&t.name.toLowerCase().includes(q))){const row=document.createElement('div');row.className='catalog-row';const label=document.createElement('span');label.textContent=t.name;row.append(label);const tokens=document.createElement('div');tokens.className='token-row';for(let n=1;n<=(t.id==='unit1'?1:3);n++){const existing=room.board.pieces.find(p=>p.type===t.id&&p.team===team&&p.copyNo===n);const b=button('',()=>{if(!editable())return toast('Reconnect, or click Not ready to edit setup.');if(existing){selected=existing.id;placing=null;}else{placing={type:t.id,copyNo:n};selected=null;}render();},'tray-token '+team+(existing?' used':''));b.title=`${t.name} ${n}${existing?' (already placed)':''}`;b.setAttribute('aria-label',`${t.name} ${n}`);b.append(graphic(t,team,n));b.draggable=true;b.ondragstart=e=>{if(!editable()){e.preventDefault();return;}dragData=existing?{id:existing.id}:{type:t.id,copyNo:n};e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};b.ondragend=()=>dragData=null;tokens.append(b);}row.append(tokens);list.append(row);}}
+el('search').oninput=renderCatalog;
+function view(x,y,w=1,h=1){return flipped?{x:WIDTH-x-w,y:HEIGHT-y-h}:{x,y};}
+function at(x,y){return room.board.pieces.filter(p=>p.x!==null&&x>=p.x&&x<p.x+p.w&&y>=p.y&&y<p.y+p.h);}
+function squareFrom(e){const b=el('board').getBoundingClientRect();let x=Math.floor((e.clientX-b.left)/cell)-1,y=Math.floor((e.clientY-b.top)/cell)-1;if(x<0||y<0||x>=WIDTH||y>=HEIGHT)return null;return flipped?{x:WIDTH-1-x,y:HEIGHT-1-y}:{x,y};}
+async function place(data,x,y,keepSelection=false){if(!editable())return toast('Reconnect, or click Not ready to edit setup.');const action=data.id?{kind:'move',id:data.id,x,y}:{kind:'add',id:uuid(),type:data.type,copyNo:data.copyNo,team,x,y,vertical:el('wallDirection').value==='vertical'};if(await act(action)){if(!keepSelection){selected=null;placing=null;}render();}}
+function squareClick(x,y,e){if(pingMode||e.shiftKey){ping(x,y);return;}if(placing){place(placing,x,y);return;}const p=room.board.pieces.find(p=>p.id===selected);if(p&&!p.fixed&&!p.type.endsWith('wall')&&editable()&&(p.x!==x||p.y!==y)){place({id:p.id},x,y);return;}const ps=at(x,y);selected=ps.length?ps[(ps.findIndex(p=>p.id===selected)+1)%ps.length].id:null;render();}
+el('board').ondragover=e=>{if(!editable())return;e.preventDefault();e.dataTransfer.dropEffect='move';const pos=squareFrom(e);if(pos&&dragData?.id&&Date.now()-lastDrag>90){lastDrag=Date.now();if(!local&&room.phase==='play'&&socket?.readyState===1)socket.send(JSON.stringify({kind:'drag',id:dragData.id,...pos}));}};
+el('board').ondrop=e=>{e.preventDefault();const pos=squareFrom(e);let data=dragData;try{data=data||JSON.parse(e.dataTransfer.getData('application/json'));}catch{}dragData=null;if(pos&&data)place(data,pos.x,pos.y);};
+function renderBoard(){const board=el('board'),next=new Map();board.replaceChildren();
+ for(let x=0;x<WIDTH;x++){const a=document.createElement('span');a.className='axis';a.textContent=coord(flipped?WIDTH-1-x:x,0).replace(/\d/g,'');a.style.left=`${(x+1)*cell}px`;a.style.top='0';board.append(a);}
+ for(let y=0;y<HEIGHT;y++){const a=document.createElement('span');a.className='axis';a.textContent=String(flipped?HEIGHT-y:y+1);a.style.top=`${(y+1)*cell}px`;a.style.left='0';board.append(a);}
+ for(let y=0;y<HEIGHT;y++)for(let x=0;x<WIDTH;x++){const v=view(x,y),b=button('',e=>squareClick(x,y,e),'cell'+((x+y)%2?' alt':''));b.style.left=`${(v.x+1)*cell}px`;b.style.top=`${(v.y+1)*cell}px`;b.dataset.x=x;b.dataset.y=y;b.setAttribute('role','gridcell');b.setAttribute('aria-label',coord(x,y));board.append(b);}
+ const measure=privateRuler||publicRuler,origin=measure&&room.board.pieces.find(p=>p.id===measure.id);if(origin&&origin.x!==null)for(let y=Math.max(0,origin.y-measure.radius);y<=Math.min(HEIGHT-1,origin.y+origin.h-1+measure.radius);y++)for(let x=Math.max(0,origin.x-measure.radius);x<=Math.min(WIDTH-1,origin.x+origin.w-1+measure.radius);x++)if(Math.max(Math.abs(x-origin.x),Math.abs(y-origin.y))<=measure.radius){const v=view(x,y),mark=document.createElement('span');mark.className='ruler-cell';mark.style.left=`${(v.x+1)*cell}px`;mark.style.top=`${(v.y+1)*cell}px`;mark.style.width=`${cell}px`;mark.style.height=`${cell}px`;board.append(mark);}
+ const ordered=[...room.board.pieces].sort((a,b)=>(b.w*b.h-a.w*a.h)||((a.id===selected?1:0)-(b.id===selected?1:0)));
+ for(const p of ordered){if(p.x===null)continue;const t=CATALOG.find(t=>t.id===p.type),v=view(p.x,p.y,p.w,p.h),d=document.createElement('div');d.className=`piece ${p.team} ${p.status}${p.id===selected?' selected':''}${p.type==='cannon'?' cannon-object':''}${p.id.startsWith('fixed-base-')?' fixed-base':''}${p.type==='giving'?' fixed-giving':''}`;d.dataset.piece=p.id;d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label',`${p.team} ${p.label} at ${coord(p.x,p.y)}`);d.title=`${p.label} · ${coord(p.x,p.y)}`;const left=(v.x+1)*cell+2,top=(v.y+1)*cell+2;Object.assign(d.style,{left:`${left}px`,top:`${top}px`,width:`${p.w*cell-4}px`,height:`${p.h*cell-4}px`});if(p.id.startsWith('fixed-base-')||p.type==='giving'){const fixedLabel=document.createElement('span');fixedLabel.className='fixed-label';fixedLabel.textContent=p.type==='giving'?'GT':'B';d.append(fixedLabel);}else d.append(graphic(t,p.team,p.copyNo));
+ if(!p.fixed&&!t.art?.[p.team+p.copyNo]){const label=document.createElement('span');label.className='tiny';label.textContent=p.type==='cannon'?`Object ${p.copyNo}`:p.label;d.append(label);}
+ if(p.status!=='normal'){const m=document.createElement('span');m.className='statusMark';m.textContent=p.status==='defeated'?'×':'⚑';d.append(m);}const n=at(p.x,p.y).length;if(n>1){const badge=document.createElement('span');badge.className='stackbadge';badge.textContent=n;d.append(badge);}
+ d.onclick=e=>{e.stopPropagation();if(pingMode||e.shiftKey){ping(p.x,p.y);return;}if(rulerMode){setRulerOrigin(p);return;}if(p.fixed)return;selected=p.id;placing=null;render();};d.onkeydown=e=>{if(e.key==='Enter'&&!p.fixed){selected=p.id;placing=null;render();}};
+ d.draggable=!p.fixed&&!p.type.endsWith('wall')&&editable();d.ondragstart=e=>{if(p.fixed||p.type.endsWith('wall')){e.preventDefault();return;}dragData={id:p.id};selected=null;placing=null;e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};d.ondragend=()=>dragData=null;board.append(d);
+ const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
+ }previousPositions=next;
+}
+function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;renderCatalog();renderBoard();
+ el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
+ el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
+ el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
+ el('counts').textContent=room.phase==='setup'?`${room.board.pieces.filter(p=>p.x!==null).length} of your pieces on board · opponent hidden`:`${room.board.pieces.filter(p=>p.x!==null).length} pieces on board`;
+ el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play';el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
+ const p=room.board.pieces.find(p=>p.id===selected);el('selection').hidden=!p;
+ el('hint').textContent=placing?`Drag or click to place ${CATALOG.find(t=>t.id===placing.type).name} ${placing.copyNo}.`:p?`${p.label} selected. ${p.type.endsWith('wall')?'Walls cannot be moved.':p.team===team?'Drag, use the cursor keys, or use the controls below.':'Opponent’s piece — you may move it after reveal with drag or the cursor keys.'}`:room.phase==='setup'?'Place your pieces privately. Both players must click Ready to reveal.':'Both players may move any non-wall piece. Click a piece, then use the cursor keys to move it one square.';
+ if(p){el('selectedName').textContent=CATALOG.find(t=>t.id===p.type).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
+ el('log').replaceChildren();for(const item of room.history){const p=document.createElement('p');p.textContent=item.text;el('log').append(p);}
+}
+function resize(){if(!room)return;if(fit){const v=el('viewport');cell=Math.max(14,Math.floor((v.clientWidth-30)/32));}previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
+new ResizeObserver(()=>{if(room&&fit)resize();}).observe(el('viewport'));
+el('fit').onclick=()=>{fit=true;resize();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);resize();};el('flip').onclick=()=>{flipped=!flipped;previousPositions.clear();renderBoard();};
+el('viewport').addEventListener('wheel',e=>{
+ if(!room||e.deltaY===0)return;e.preventDefault();
+ const viewport=el('viewport'),board=el('board'),before=board.getBoundingClientRect(),cursorX=e.clientX-before.left,cursorY=e.clientY-before.top,oldCell=cell;
+ fit=false;cell=Math.max(14,Math.min(90,cell*(e.deltaY<0?1.1:.9)));document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=Math.round(cell/30*100)+'%';previousPositions.clear();renderBoard();
+ const after=board.getBoundingClientRect(),scale=cell/oldCell;
+ viewport.scrollLeft+=after.left+cursorX*scale-e.clientX;
+ viewport.scrollTop+=after.top+cursorY*scale-e.clientY;
+},{passive:false});
+el('ping').onclick=()=>{pingMode=!pingMode;el('ping').classList.toggle('active',pingMode);};
+function ping(x,y){if(local)showPing({x,y,team});else if(socket?.readyState===1)socket.send(JSON.stringify({kind:'ping',x,y}));else toast('Reconnect before sending a ping.');}
+function showPing(p){const v=view(p.x,p.y),d=document.createElement('div');d.className='board-ping '+p.team;Object.assign(d.style,{left:`${(v.x+1.5)*cell}px`,top:`${(v.y+1.5)*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),1500);}
+function showDrag(a){const p=room.board.pieces.find(p=>p.id===a.id);if(!p)return;document.querySelectorAll('.drag-preview').forEach(x=>x.remove());const v=view(a.x,a.y,p.w,p.h),d=document.createElement('div');d.className='drag-preview '+a.team;d.textContent=p.label;Object.assign(d.style,{left:`${(v.x+1)*cell}px`,top:`${(v.y+1)*cell}px`,width:`${p.w*cell}px`,height:`${p.h*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),800);}
+el('addReserve').onclick=()=>{if(!placing)return toast('Choose a numbered piece first.');place(placing,null,null);};
+el('savePiece').onclick=()=>act({kind:'edit',id:selected,label:el('label').value.trim(),status:el('pieceStatus').value});el('rotate').onclick=()=>act({kind:'rotate',id:selected});el('reservePiece').onclick=()=>act({kind:'move',id:selected,x:null,y:null});el('remove').onclick=()=>act({kind:'remove',id:selected});
+function cancel(){selected=null;placing=null;pingMode=false;el('ping').classList.remove('active');if(room)render();}el('cancel').onclick=cancel;
+const cursorKeys=new Set();let cursorMoveTimer=null;
+function moveSelectedByKeys(){cursorMoveTimer=null;if(!room||!selected||busy)return;const p=room.board.pieces.find(p=>p.id===selected);if(!p||p.fixed||p.type.endsWith('wall')||!editable()||p.x===null)return;const dx=(cursorKeys.has('ArrowRight')?1:0)-(cursorKeys.has('ArrowLeft')?1:0),dy=(cursorKeys.has('ArrowDown')?1:0)-(cursorKeys.has('ArrowUp')?1:0);if(!dx&&!dy)return;const x=p.x+dx,y=p.y+dy;if(x<0||y<0||x+p.w>WIDTH||y+p.h>HEIGHT)return;place({id:p.id},x,y,true);}
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){cancel();return;}
+ if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)||!room||!selected)return;
+ if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+ cursorKeys.add(e.key);e.preventDefault();if(!cursorMoveTimer)cursorMoveTimer=setTimeout(moveSelectedByKeys,35);
+},true);
+document.addEventListener('keyup',e=>{if(cursorKeys.has(e.key))cursorKeys.delete(e.key);},true);
+el('undo').onclick=()=>act({kind:'undo'});
+el('clear').onclick=()=>{if(confirm('Return all YOUR pieces to the tray?'))act({kind:'clear'});};
+el('reset').onclick=()=>{if(confirm('Reset the entire table for a new setup? This clears both armies from the board.')){selected=null;placing=null;act({kind:'reset'});}};
+el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-board-v2',board:room.board},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Kings_Grid_${room.code}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+el('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Save is too large.');const d=JSON.parse(await f.text());validateBoard(d.board);if(confirm('Replace the entire revealed board with this save?'))await act({kind:'import',board:d.board});}catch(err){toast(err.message);}e.target.value='';};
+async function copyLink(privateLink){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',session.code);u.searchParams.set('server',session.api);if(privateLink)u.hash=new URLSearchParams({resume:session.token}).toString();try{await navigator.clipboard.writeText(u.href);toast(privateLink?'Private resume link copied. Keep it for yourself.':'Invite copied. Send it to the other player.');}catch{prompt('Copy this '+(privateLink?'private resume link':'invite')+':',u.href);}}
+el('invite').onclick=()=>copyLink(false);el('resume').onclick=()=>copyLink(true);el('trayTab').onclick=()=>{el('tray').hidden=false;el('log').hidden=true;el('trayTab').classList.add('active');el('logTab').classList.remove('active');};el('logTab').onclick=()=>{el('tray').hidden=true;el('log').hidden=false;el('logTab').classList.add('active');el('trayTab').classList.remove('active');};
+
+</script></body></html>
