@@ -14,16 +14,16 @@ export function applyAction(r,team,a){
   throw Error('Pass Turn is no longer used after setup. Both players may move pieces.');
  }else{
   if(r.phase==='setup'&&r.ready[team])throw Error('Click Not ready to change your setup.');
-  // After setup, both players may move any non-wall piece. The board does not enforce turns.
+  // After setup, both players may move any piece. The board does not enforce turns.
   if(a.kind==='undo'){
    const last=r.undo[team].pop();if(!last)throw Error('Nothing to undo.');
    if(r.phase==='setup')r.board.pieces=[...r.board.pieces.filter(p=>p.fixed||p.team!==team),...last.pieces.filter(p=>!p.fixed)];else {r.board=last;r.undo[other(team)]=[];}description='Undid last edit';
   }else{
    const piece=r.board.pieces.find(p=>p.id===a.id);
-   if(['edit','rotate','remove'].includes(a.kind)&&(!piece||piece.team!==team))throw Error('Select one of your own pieces.');
+   if(['edit','remove'].includes(a.kind)&&(!piece||piece.team!==team))throw Error('Select one of your own pieces.');
    if(a.kind==='move'&&(!piece||piece.fixed))throw Error('That piece cannot be moved.');
    if(a.kind==='move'&&r.phase==='setup'&&piece.team!==team)throw Error('Only move your own pieces during setup.');
-   if(a.kind==='move'&&piece.type.endsWith('wall'))throw Error('Walls cannot be moved.');
+   if(a.kind==='rotate'&&(!piece||piece.fixed||(piece.team!==team&&(r.phase==='setup'||!piece.type.endsWith('wall')))))throw Error('You cannot rotate that piece during this phase.');
    if(a.kind==='edit'&&a.team!==undefined&&a.team!==team)throw Error('Piece colours belong to their player.');
    if(a.kind==='add'){
     if(a.team!==team)throw Error('Place pieces from your own tray.');

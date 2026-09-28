@@ -21,7 +21,7 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.6 Worker first.');
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.7 Worker first.');
   local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
@@ -60,9 +60,10 @@ function view(x,y,w=1,h=1){return flipped?{x:WIDTH-x-w,y:HEIGHT-y-h}:{x,y};}
 function at(x,y){return room.board.pieces.filter(p=>p.x!==null&&x>=p.x&&x<p.x+p.w&&y>=p.y&&y<p.y+p.h);}
 function squareFrom(e){const b=el('board').getBoundingClientRect();let x=Math.floor((e.clientX-b.left)/cell)-1,y=Math.floor((e.clientY-b.top)/cell)-1;if(x<0||y<0||x>=WIDTH||y>=HEIGHT)return null;return flipped?{x:WIDTH-1-x,y:HEIGHT-1-y}:{x,y};}
 async function place(data,x,y,keepSelection=false){if(!editable())return toast('Reconnect, or click Not ready to edit setup.');const action=data.id?{kind:'move',id:data.id,x,y}:{kind:'add',id:uuid(),type:data.type,copyNo:data.copyNo,team,x,y,vertical:el('wallDirection').value==='vertical'};if(await act(action)){if(!keepSelection){selected=null;placing=null;}render();}}
-function squareClick(x,y,e){if(pingMode||e.shiftKey){ping(x,y);return;}if(placing){place(placing,x,y);return;}const p=room.board.pieces.find(p=>p.id===selected);if(p&&!p.fixed&&!p.type.endsWith('wall')&&editable()&&(p.x!==x||p.y!==y)){place({id:p.id},x,y);return;}const ps=at(x,y);selected=ps.length?ps[(ps.findIndex(p=>p.id===selected)+1)%ps.length].id:null;render();}
+function squareClick(x,y,e){if(pingMode||e.shiftKey){ping(x,y);return;}if(placing){place(placing,x,y);return;}const p=room.board.pieces.find(p=>p.id===selected);if(p&&!p.fixed&&editable()&&(p.x!==x||p.y!==y)){place({id:p.id},x,y);return;}const ps=at(x,y);selected=ps.length?ps[(ps.findIndex(p=>p.id===selected)+1)%ps.length].id:null;render();}
 el('board').ondragover=e=>{if(!editable())return;e.preventDefault();e.dataTransfer.dropEffect='move';const pos=squareFrom(e);if(pos&&dragData?.id&&Date.now()-lastDrag>90){lastDrag=Date.now();if(!local&&room.phase==='play'&&socket?.readyState===1)socket.send(JSON.stringify({kind:'drag',id:dragData.id,...pos}));}};
 el('board').ondrop=e=>{e.preventDefault();const pos=squareFrom(e);let data=dragData;try{data=data||JSON.parse(e.dataTransfer.getData('application/json'));}catch{}dragData=null;if(pos&&data)place(data,pos.x,pos.y);};
+let wallClick=null;
 function renderBoard(){const board=el('board'),next=new Map();board.replaceChildren();
  for(let x=0;x<WIDTH;x++){const a=document.createElement('span');a.className='axis';a.textContent=coord(flipped?WIDTH-1-x:x,0).replace(/\d/g,'');a.style.left=`${(x+1)*cell}px`;a.style.top='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++){const a=document.createElement('span');a.className='axis';a.textContent=String(flipped?HEIGHT-y:y+1);a.style.top=`${(y+1)*cell}px`;a.style.left='0';board.append(a);}
@@ -72,20 +73,20 @@ function renderBoard(){const board=el('board'),next=new Map();board.replaceChild
  for(const p of ordered){if(p.x===null)continue;const t=CATALOG.find(t=>t.id===p.type),v=view(p.x,p.y,p.w,p.h),d=document.createElement('div');d.className=`piece ${p.team} ${p.status}${p.id===selected?' selected':''}${p.type==='cannon'?' cannon-object':''}${p.id.startsWith('fixed-base-')?' fixed-base':''}${p.type==='giving'?' fixed-giving':''}`;d.dataset.piece=p.id;d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label',`${p.team} ${p.label} at ${coord(p.x,p.y)}`);d.title=`${p.label} · ${coord(p.x,p.y)}`;const left=(v.x+1)*cell+2,top=(v.y+1)*cell+2;Object.assign(d.style,{left:`${left}px`,top:`${top}px`,width:`${p.w*cell-4}px`,height:`${p.h*cell-4}px`});if(p.id.startsWith('fixed-base-')||p.type==='giving'){const fixedLabel=document.createElement('span');fixedLabel.className='fixed-label';fixedLabel.textContent=p.type==='giving'?'GT':'B';d.append(fixedLabel);}else d.append(graphic(t,p.team,p.copyNo));
  if(!p.fixed&&!t.art?.[p.team+p.copyNo]){const label=document.createElement('span');label.className='tiny';label.textContent=p.type==='cannon'?`Object ${p.copyNo}`:p.label;d.append(label);}
  if(p.status!=='normal'){const m=document.createElement('span');m.className='statusMark';m.textContent=p.status==='defeated'?'×':'⚑';d.append(m);}const n=at(p.x,p.y).length;if(n>1){const badge=document.createElement('span');badge.className='stackbadge';badge.textContent=n;d.append(badge);}
- d.onclick=e=>{e.stopPropagation();if(pingMode||e.shiftKey){ping(p.x,p.y);return;}if(rulerMode){setRulerOrigin(p);return;}if(p.fixed)return;selected=p.id;placing=null;render();};d.onkeydown=e=>{if(e.key==='Enter'&&!p.fixed){selected=p.id;placing=null;render();}};
- d.draggable=!p.fixed&&!p.type.endsWith('wall')&&editable();d.ondragstart=e=>{if(p.fixed||p.type.endsWith('wall')){e.preventDefault();return;}dragData={id:p.id};selected=null;placing=null;e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};d.ondragend=()=>dragData=null;board.append(d);
+ d.onclick=e=>{e.stopPropagation();if(pingMode||e.shiftKey){ping(p.x,p.y);return;}if(rulerMode){setRulerOrigin(p);return;}if(p.fixed)return;if(p.type.endsWith('wall')){const now=performance.now();if(wallClick?.id===p.id&&now-wallClick.at<500){wallClick=null;if(editable())act({kind:'rotate',id:p.id});return;}wallClick={id:p.id,at:now};}else wallClick=null;selected=p.id;placing=null;render();};d.onkeydown=e=>{if(e.key==='Enter'&&!p.fixed){selected=p.id;placing=null;render();}};
+ d.draggable=!p.fixed&&editable();d.ondragstart=e=>{if(p.fixed||!editable()){e.preventDefault();return;}dragData={id:p.id};selected=null;placing=null;e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};d.ondragend=()=>dragData=null;board.append(d);
  const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
  }previousPositions=next;
 }
 function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
- el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
+ el('fullscreen').hidden=room.phase!=='play';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
  el('counts').textContent=room.phase==='setup'?`${room.board.pieces.filter(p=>p.x!==null).length} of your pieces on board · opponent hidden`:`${room.board.pieces.filter(p=>p.x!==null).length} pieces on board`;
  el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play';el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
  const p=room.board.pieces.find(p=>p.id===selected);el('selection').hidden=!p;
- el('hint').textContent=placing?`Drag or click to place ${CATALOG.find(t=>t.id===placing.type).name} ${placing.copyNo}.`:p?`${p.label} selected. ${p.type.endsWith('wall')?'Walls cannot be moved.':p.team===team?'Drag, use the cursor keys, or use the controls below.':'Opponent’s piece — you may move it after reveal with drag or the cursor keys.'}`:room.phase==='setup'?'Place your pieces privately. Both players must click Ready to reveal.':'Both players may move any non-wall piece. Click a piece, then use the cursor keys to move it one square.';
- if(p){el('selectedName').textContent=CATALOG.find(t=>t.id===p.type).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
+ el('hint').textContent=placing?`Drag or click to place ${CATALOG.find(t=>t.id===placing.type).name} ${placing.copyNo}.`:p?`${p.label} selected. ${p.type.endsWith('wall')?'Drag or use cursor keys to move; double-click to rotate.':p.team===team?'Drag, use the cursor keys, or use the controls below.':'Opponent’s piece — you may move it after reveal with drag or the cursor keys.'}`:room.phase==='setup'?'Place your pieces privately. Both players must click Ready to reveal.':'Both players may move any piece. Click a piece, then use the cursor keys to move it one square.';
+ if(p){el('selectedName').textContent=CATALOG.find(t=>t.id===p.type).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('rotate').disabled=!editable()||p.fixed||(p.team!==team&&(room.phase!=='play'||!p.type.endsWith('wall')));el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
  el('log').replaceChildren();for(const item of room.history){const p=document.createElement('p');p.textContent=item.text;el('log').append(p);}
 }
 function resize(){if(!room)return;if(fit){const v=el('viewport');cell=Math.max(14,Math.floor((v.clientWidth-30)/32));}previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
@@ -107,7 +108,7 @@ el('addReserve').onclick=()=>{if(!placing)return toast('Choose a numbered piece 
 el('savePiece').onclick=()=>act({kind:'edit',id:selected,label:el('label').value.trim(),status:el('pieceStatus').value});el('rotate').onclick=()=>act({kind:'rotate',id:selected});el('reservePiece').onclick=()=>act({kind:'move',id:selected,x:null,y:null});el('remove').onclick=()=>act({kind:'remove',id:selected});
 function cancel(){selected=null;placing=null;pingMode=false;el('ping').classList.remove('active');if(room)render();}el('cancel').onclick=cancel;
 const cursorKeys=new Set();let cursorMoveTimer=null;
-function moveSelectedByKeys(){cursorMoveTimer=null;if(!room||!selected||busy)return;const p=room.board.pieces.find(p=>p.id===selected);if(!p||p.fixed||p.type.endsWith('wall')||!editable()||p.x===null)return;const dx=(cursorKeys.has('ArrowRight')?1:0)-(cursorKeys.has('ArrowLeft')?1:0),dy=(cursorKeys.has('ArrowDown')?1:0)-(cursorKeys.has('ArrowUp')?1:0);if(!dx&&!dy)return;const x=p.x+dx,y=p.y+dy;if(x<0||y<0||x+p.w>WIDTH||y+p.h>HEIGHT)return;place({id:p.id},x,y,true);}
+function moveSelectedByKeys(){cursorMoveTimer=null;if(!room||!selected||busy)return;const p=room.board.pieces.find(p=>p.id===selected);if(!p||p.fixed||!editable()||p.x===null)return;const dx=(cursorKeys.has('ArrowRight')?1:0)-(cursorKeys.has('ArrowLeft')?1:0),dy=(cursorKeys.has('ArrowDown')?1:0)-(cursorKeys.has('ArrowUp')?1:0);if(!dx&&!dy)return;const x=p.x+dx,y=p.y+dy;if(x<0||y<0||x+p.w>WIDTH||y+p.h>HEIGHT)return;place({id:p.id},x,y,true);}
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){cancel();return;}
  if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)||!room||!selected)return;
@@ -122,3 +123,29 @@ el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-b
 el('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Save is too large.');const d=JSON.parse(await f.text());validateBoard(d.board);if(confirm('Replace the entire revealed board with this save?'))await act({kind:'import',board:d.board});}catch(err){toast(err.message);}e.target.value='';};
 async function copyLink(privateLink){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',session.code);u.searchParams.set('server',session.api);if(privateLink)u.hash=new URLSearchParams({resume:session.token}).toString();try{await navigator.clipboard.writeText(u.href);toast(privateLink?'Private resume link copied. Keep it for yourself.':'Invite copied. Send it to the other player.');}catch{prompt('Copy this '+(privateLink?'private resume link':'invite')+':',u.href);}}
 el('invite').onclick=()=>copyLink(false);el('resume').onclick=()=>copyLink(true);el('trayTab').onclick=()=>{el('tray').hidden=false;el('log').hidden=true;el('trayTab').classList.add('active');el('logTab').classList.remove('active');};el('logTab').onclick=()=>{el('tray').hidden=true;el('log').hidden=false;el('logTab').classList.add('active');el('trayTab').classList.remove('active');};
+
+// Middle mouse pans the viewport, including when pressed over a piece.
+let pan=null;
+const viewport=el('viewport');
+viewport.addEventListener('pointerdown',e=>{
+ if(e.button!==1||!room)return;
+ e.preventDefault();e.stopPropagation();wallClick=null;
+ pan={id:e.pointerId,x:e.clientX,y:e.clientY,left:viewport.scrollLeft,top:viewport.scrollTop};
+ viewport.setPointerCapture(e.pointerId);viewport.classList.add('panning');
+},true);
+viewport.addEventListener('pointermove',e=>{if(!pan||e.pointerId!==pan.id)return;e.preventDefault();viewport.scrollLeft=pan.left+pan.x-e.clientX;viewport.scrollTop=pan.top+pan.y-e.clientY;});
+function endPan(e){if(!pan||e.pointerId!==pan.id)return;pan=null;viewport.classList.remove('panning');if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);}
+viewport.addEventListener('pointerup',endPan);viewport.addEventListener('pointercancel',endPan);viewport.addEventListener('lostpointercapture',()=>{pan=null;viewport.classList.remove('panning');});
+viewport.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault();});
+viewport.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault();},true);
+let fullscreenView=null;
+el('fullscreen').onclick=async()=>{
+ if(room?.phase!=='play')return;
+ if(!viewport.requestFullscreen)return toast('Fullscreen is unavailable in this browser.');
+ fullscreenView={fit,cell,left:viewport.scrollLeft,top:viewport.scrollTop};
+ try{await viewport.requestFullscreen();}catch{fullscreenView=null;toast('The browser could not enter fullscreen.');}
+};
+document.addEventListener('fullscreenchange',()=>{
+ if(document.fullscreenElement===viewport){fit=false;cell=Math.max(14,Math.min((viewport.clientWidth-30)/32,(viewport.clientHeight-30)/22));resize();viewport.scrollLeft=viewport.scrollTop=0;}
+ else if(fullscreenView){const old=fullscreenView;fullscreenView=null;fit=old.fit;cell=old.cell;resize();viewport.scrollLeft=old.left;viewport.scrollTop=old.top;}
+});
