@@ -5,7 +5,10 @@ export const CATALOG = [
     "icon": "♛",
     "short": "King",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit1-red-1.png?v=0.2.9",
+      "blue1": "assets/unit1-blue-1.png?v=0.2.9"
+    }
   },
   {
     "id": "unit2",
@@ -14,12 +17,12 @@ export const CATALOG = [
     "short": "Builder",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit2-red-1.png",
-      "red2": "assets/unit2-red-2.png",
-      "red3": "assets/unit2-red-3.png",
-      "blue1": "assets/unit2-blue-1.png",
-      "blue2": "assets/unit2-blue-2.png",
-      "blue3": "assets/unit2-blue-3.png"
+      "red1": "assets/unit2-red-1.png?v=0.2.9",
+      "red2": "assets/unit2-red-2.png?v=0.2.9",
+      "red3": "assets/unit2-red-3.png?v=0.2.9",
+      "blue1": "assets/unit2-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit2-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit2-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -29,7 +32,12 @@ export const CATALOG = [
     "short": "Wood",
     "kind": "unit",
     "art": {
-      "red3": "assets/unit3-red-3.png"
+      "red1": "assets/unit3-red-1.png?v=0.2.9",
+      "red2": "assets/unit3-red-2.png?v=0.2.9",
+      "red3": "assets/unit3-red-3.png?v=0.2.9",
+      "blue1": "assets/unit3-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit3-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit3-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -39,12 +47,12 @@ export const CATALOG = [
     "short": "Stone",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit4-red-1.png",
-      "red2": "assets/unit4-red-2.png",
-      "red3": "assets/unit4-red-3.png",
-      "blue1": "assets/unit4-blue-1.png",
-      "blue2": "assets/unit4-blue-2.png",
-      "blue3": "assets/unit4-blue-3.png"
+      "red1": "assets/unit4-red-1.png?v=0.2.9",
+      "red2": "assets/unit4-red-2.png?v=0.2.9",
+      "red3": "assets/unit4-red-3.png?v=0.2.9",
+      "blue1": "assets/unit4-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit4-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit4-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -54,12 +62,12 @@ export const CATALOG = [
     "short": "Iron",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit5-red-1.png",
-      "red2": "assets/unit5-red-2.png",
-      "red3": "assets/unit5-red-3.png",
-      "blue1": "assets/unit5-blue-1.png",
-      "blue2": "assets/unit5-blue-2.png",
-      "blue3": "assets/unit5-blue-3.png"
+      "red1": "assets/unit5-red-1.png?v=0.2.9",
+      "red2": "assets/unit5-red-2.png?v=0.2.9",
+      "red3": "assets/unit5-red-3.png?v=0.2.9",
+      "blue1": "assets/unit5-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit5-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit5-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -69,8 +77,12 @@ export const CATALOG = [
     "short": "Sword",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit6-red-1.png",
-      "red3": "assets/unit6-red-3.png"
+      "red1": "assets/unit6-red-1.png?v=0.2.9",
+      "red2": "assets/unit6-red-2.png?v=0.2.9",
+      "red3": "assets/unit6-red-3.png?v=0.2.9",
+      "blue1": "assets/unit6-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit6-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit6-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -79,7 +91,14 @@ export const CATALOG = [
     "icon": "🔱",
     "short": "Spear",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit7-red-1.png?v=0.2.9",
+      "red2": "assets/unit7-red-2.png?v=0.2.9",
+      "red3": "assets/unit7-red-3.png?v=0.2.9",
+      "blue1": "assets/unit7-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit7-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit7-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit8",
@@ -88,9 +107,12 @@ export const CATALOG = [
     "short": "Bow",
     "kind": "unit",
     "art": {
-      "red3": "assets/unit8-red-3.png",
-      "blue2": "assets/unit8-blue-2.png",
-      "blue3": "assets/unit8-blue-3.png"
+      "red1": "assets/unit8-red-1.png?v=0.2.9",
+      "red2": "assets/unit8-red-2.png?v=0.2.9",
+      "red3": "assets/unit8-red-3.png?v=0.2.9",
+      "blue1": "assets/unit8-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit8-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit8-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -99,7 +121,14 @@ export const CATALOG = [
     "icon": "♞",
     "short": "Lance",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit9-red-1.png?v=0.2.9",
+      "red2": "assets/unit9-red-2.png?v=0.2.9",
+      "red3": "assets/unit9-red-3.png?v=0.2.9",
+      "blue1": "assets/unit9-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit9-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit9-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit10",
@@ -108,12 +137,12 @@ export const CATALOG = [
     "short": "Mage",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit10-red-1.png",
-      "red2": "assets/unit10-red-2.png",
-      "red3": "assets/unit10-red-3.png",
-      "blue1": "assets/unit10-blue-1.png",
-      "blue2": "assets/unit10-blue-2.png",
-      "blue3": "assets/unit10-blue-3.png"
+      "red1": "assets/unit10-red-1.png?v=0.2.9",
+      "red2": "assets/unit10-red-2.png?v=0.2.9",
+      "red3": "assets/unit10-red-3.png?v=0.2.9",
+      "blue1": "assets/unit10-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit10-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit10-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -123,12 +152,12 @@ export const CATALOG = [
     "short": "Priest",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit11-red-1.png",
-      "red2": "assets/unit11-red-2.png",
-      "red3": "assets/unit11-red-3.png",
-      "blue1": "assets/unit11-blue-1.png",
-      "blue2": "assets/unit11-blue-2.png",
-      "blue3": "assets/unit11-blue-3.png"
+      "red1": "assets/unit11-red-1.png?v=0.2.9",
+      "red2": "assets/unit11-red-2.png?v=0.2.9",
+      "red3": "assets/unit11-red-3.png?v=0.2.9",
+      "blue1": "assets/unit11-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit11-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit11-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -138,12 +167,12 @@ export const CATALOG = [
     "short": "Medic",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit12-red-1.png",
-      "red2": "assets/unit12-red-2.png",
-      "red3": "assets/unit12-red-3.png",
-      "blue1": "assets/unit12-blue-1.png",
-      "blue2": "assets/unit12-blue-2.png",
-      "blue3": "assets/unit12-blue-3.png"
+      "red1": "assets/unit12-red-1.png?v=0.2.9",
+      "red2": "assets/unit12-red-2.png?v=0.2.9",
+      "red3": "assets/unit12-red-3.png?v=0.2.9",
+      "blue1": "assets/unit12-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit12-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit12-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -153,12 +182,12 @@ export const CATALOG = [
     "short": "Necro",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit13-red-1.png",
-      "red2": "assets/unit13-red-2.png",
-      "red3": "assets/unit13-red-3.png",
-      "blue1": "assets/unit13-blue-1.png",
-      "blue2": "assets/unit13-blue-2.png",
-      "blue3": "assets/unit13-blue-3.png"
+      "red1": "assets/unit13-red-1.png?v=0.2.9",
+      "red2": "assets/unit13-red-2.png?v=0.2.9",
+      "red3": "assets/unit13-red-3.png?v=0.2.9",
+      "blue1": "assets/unit13-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit13-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit13-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -168,12 +197,12 @@ export const CATALOG = [
     "short": "Farmer",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit14-red-1.png",
-      "red2": "assets/unit14-red-2.png",
-      "red3": "assets/unit14-red-3.png",
-      "blue1": "assets/unit14-blue-1.png",
-      "blue2": "assets/unit14-blue-2.png",
-      "blue3": "assets/unit14-blue-3.png"
+      "red1": "assets/unit14-red-1.png?v=0.2.9",
+      "red2": "assets/unit14-red-2.png?v=0.2.9",
+      "red3": "assets/unit14-red-3.png?v=0.2.9",
+      "blue1": "assets/unit14-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit14-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit14-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -183,12 +212,12 @@ export const CATALOG = [
     "short": "Artill.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit15-red-1.png",
-      "red2": "assets/unit15-red-2.png",
-      "red3": "assets/unit15-red-3.png",
-      "blue1": "assets/unit15-blue-1.png",
-      "blue2": "assets/unit15-blue-2.png",
-      "blue3": "assets/unit15-blue-3.png"
+      "red1": "assets/unit15-red-1.png?v=0.2.9",
+      "red2": "assets/unit15-red-2.png?v=0.2.9",
+      "red3": "assets/unit15-red-3.png?v=0.2.9",
+      "blue1": "assets/unit15-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit15-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit15-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -198,12 +227,12 @@ export const CATALOG = [
     "short": "Mech.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit16-red-1.png",
-      "red2": "assets/unit16-red-2.png",
-      "red3": "assets/unit16-red-3.png",
-      "blue1": "assets/unit16-blue-1.png",
-      "blue2": "assets/unit16-blue-2.png",
-      "blue3": "assets/unit16-blue-3.png"
+      "red1": "assets/unit16-red-1.png?v=0.2.9",
+      "red2": "assets/unit16-red-2.png?v=0.2.9",
+      "red3": "assets/unit16-red-3.png?v=0.2.9",
+      "blue1": "assets/unit16-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit16-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit16-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -212,7 +241,14 @@ export const CATALOG = [
     "icon": "◉",
     "short": "Oracle",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit17-red-1.png?v=0.2.9",
+      "red2": "assets/unit17-red-2.png?v=0.2.9",
+      "red3": "assets/unit17-red-3.png?v=0.2.9",
+      "blue1": "assets/unit17-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit17-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit17-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit18",
@@ -221,12 +257,12 @@ export const CATALOG = [
     "short": "Thief",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit18-red-1.png",
-      "red2": "assets/unit18-red-2.png",
-      "red3": "assets/unit18-red-3.png",
-      "blue1": "assets/unit18-blue-1.png",
-      "blue2": "assets/unit18-blue-2.png",
-      "blue3": "assets/unit18-blue-3.png"
+      "red1": "assets/unit18-red-1.png?v=0.2.9",
+      "red2": "assets/unit18-red-2.png?v=0.2.9",
+      "red3": "assets/unit18-red-3.png?v=0.2.9",
+      "blue1": "assets/unit18-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit18-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit18-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -236,11 +272,12 @@ export const CATALOG = [
     "short": "Strat.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit19-red-1.png",
-      "red2": "assets/unit19-red-2.png",
-      "red3": "assets/unit19-red-3.png",
-      "blue1": "assets/unit19-blue-1.png",
-      "blue3": "assets/unit19-blue-3.png"
+      "red1": "assets/unit19-red-1.png?v=0.2.9",
+      "red2": "assets/unit19-red-2.png?v=0.2.9",
+      "red3": "assets/unit19-red-3.png?v=0.2.9",
+      "blue1": "assets/unit19-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit19-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit19-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -250,27 +287,27 @@ export const CATALOG = [
     "short": "Shop",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit20-red-1.png",
-      "red2": "assets/unit20-red-2.png",
-      "red3": "assets/unit20-red-3.png",
-      "blue1": "assets/unit20-blue-1.png",
-      "blue2": "assets/unit20-blue-2.png",
-      "blue3": "assets/unit20-blue-3.png"
+      "red1": "assets/unit20-red-1.png?v=0.2.9",
+      "red2": "assets/unit20-red-2.png?v=0.2.9",
+      "red3": "assets/unit20-red-3.png?v=0.2.9",
+      "blue1": "assets/unit20-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit20-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit20-blue-3.png?v=0.2.9"
     }
   },
   {
-    "id": "ritual",
-    "name": "Ritual Caster",
-    "short": "Ritual",
-    "icon": "✧",
+    "id": "bard",
+    "name": "Bard",
+    "short": "Bard",
+    "icon": "♫",
     "kind": "unit",
     "art": {
-      "red1": "assets/ritual-red-1.png",
-      "red2": "assets/ritual-red-2.png",
-      "red3": "assets/ritual-red-3.png",
-      "blue1": "assets/ritual-blue-1.png",
-      "blue2": "assets/ritual-blue-2.png",
-      "blue3": "assets/ritual-blue-3.png"
+      "red1": "assets/bard-red-1.png?v=0.2.9",
+      "red2": "assets/bard-red-2.png?v=0.2.9",
+      "red3": "assets/bard-red-3.png?v=0.2.9",
+      "blue1": "assets/bard-blue-1.png?v=0.2.9",
+      "blue2": "assets/bard-blue-2.png?v=0.2.9",
+      "blue3": "assets/bard-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -295,7 +332,10 @@ export const CATALOG = [
     "icon": "●",
     "short": "Cannon",
     "kind": "marker",
-    "art": {}
+    "art": {
+      "red1": "assets/cannon.png?v=0.2.9",
+      "blue1": "assets/cannon.png?v=0.2.9"
+    }
   },
   {
     "id": "woodwall",

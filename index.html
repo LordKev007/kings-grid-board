@@ -6,7 +6,7 @@
 
 #viewport.panning,#viewport.panning *{cursor:grabbing!important}#viewport:fullscreen{width:100vw;height:100vh;max-height:none;border:0;border-radius:0;flex:none;padding:14px;overflow:auto;background:#10181f}
 </style></head><body>
-<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.7</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="leave" hidden>Leave table</button></header>
+<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.9</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
 <main id="welcome"><section class="intro"><div class="eyebrow">PULL UP A CHAIR</div><h2>Same board.<br>Different places.</h2><p>Move the pieces here. Keep your units on your iPads.<br>Bring your own voice call and settle in for a game.</p><div class="mini-grid"><span>♛</span><span>♞</span><span>⚔</span></div><button id="local" class="secondary">Try the board on this computer</button><p class="muted">Local practice is saved only in this browser.</p></section><section class="joincard"><h3>Your table</h3><label>Board server URL<input id="api" type="url" placeholder="https://kings-grid-board.…workers.dev" autocomplete="url"></label><p class="muted">Use the new board Worker’s URL from Cloudflare.</p><label>Your name<input id="name" maxlength="30" placeholder="Kevin or Bubs" autocomplete="given-name"></label><div class="choose"><label><input type="radio" name="team" value="red"> <b class="redtext">Red</b></label><label><input type="radio" name="team" value="blue"> <b class="bluetext">Blue</b></label></div><button id="create" class="primary">Create a table</button><div class="divider">OR JOIN A TABLE</div><label>Room code<input id="code" maxlength="8" placeholder="8-character code" autocapitalize="characters"></label><button id="join">Join / resume table</button><p id="setupError" role="alert"></p></section></main>
 <main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><button id="flip">Flip view</button><button id="fullscreen" hidden>Board fullscreen</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
 const CATALOG = [
@@ -16,7 +16,10 @@ const CATALOG = [
     "icon": "♛",
     "short": "King",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit1-red-1.png?v=0.2.9",
+      "blue1": "assets/unit1-blue-1.png?v=0.2.9"
+    }
   },
   {
     "id": "unit2",
@@ -25,12 +28,12 @@ const CATALOG = [
     "short": "Builder",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit2-red-1.png",
-      "red2": "assets/unit2-red-2.png",
-      "red3": "assets/unit2-red-3.png",
-      "blue1": "assets/unit2-blue-1.png",
-      "blue2": "assets/unit2-blue-2.png",
-      "blue3": "assets/unit2-blue-3.png"
+      "red1": "assets/unit2-red-1.png?v=0.2.9",
+      "red2": "assets/unit2-red-2.png?v=0.2.9",
+      "red3": "assets/unit2-red-3.png?v=0.2.9",
+      "blue1": "assets/unit2-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit2-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit2-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -40,7 +43,12 @@ const CATALOG = [
     "short": "Wood",
     "kind": "unit",
     "art": {
-      "red3": "assets/unit3-red-3.png"
+      "red1": "assets/unit3-red-1.png?v=0.2.9",
+      "red2": "assets/unit3-red-2.png?v=0.2.9",
+      "red3": "assets/unit3-red-3.png?v=0.2.9",
+      "blue1": "assets/unit3-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit3-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit3-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -50,12 +58,12 @@ const CATALOG = [
     "short": "Stone",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit4-red-1.png",
-      "red2": "assets/unit4-red-2.png",
-      "red3": "assets/unit4-red-3.png",
-      "blue1": "assets/unit4-blue-1.png",
-      "blue2": "assets/unit4-blue-2.png",
-      "blue3": "assets/unit4-blue-3.png"
+      "red1": "assets/unit4-red-1.png?v=0.2.9",
+      "red2": "assets/unit4-red-2.png?v=0.2.9",
+      "red3": "assets/unit4-red-3.png?v=0.2.9",
+      "blue1": "assets/unit4-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit4-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit4-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -65,12 +73,12 @@ const CATALOG = [
     "short": "Iron",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit5-red-1.png",
-      "red2": "assets/unit5-red-2.png",
-      "red3": "assets/unit5-red-3.png",
-      "blue1": "assets/unit5-blue-1.png",
-      "blue2": "assets/unit5-blue-2.png",
-      "blue3": "assets/unit5-blue-3.png"
+      "red1": "assets/unit5-red-1.png?v=0.2.9",
+      "red2": "assets/unit5-red-2.png?v=0.2.9",
+      "red3": "assets/unit5-red-3.png?v=0.2.9",
+      "blue1": "assets/unit5-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit5-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit5-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -80,8 +88,12 @@ const CATALOG = [
     "short": "Sword",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit6-red-1.png",
-      "red3": "assets/unit6-red-3.png"
+      "red1": "assets/unit6-red-1.png?v=0.2.9",
+      "red2": "assets/unit6-red-2.png?v=0.2.9",
+      "red3": "assets/unit6-red-3.png?v=0.2.9",
+      "blue1": "assets/unit6-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit6-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit6-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -90,7 +102,14 @@ const CATALOG = [
     "icon": "🔱",
     "short": "Spear",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit7-red-1.png?v=0.2.9",
+      "red2": "assets/unit7-red-2.png?v=0.2.9",
+      "red3": "assets/unit7-red-3.png?v=0.2.9",
+      "blue1": "assets/unit7-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit7-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit7-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit8",
@@ -99,9 +118,12 @@ const CATALOG = [
     "short": "Bow",
     "kind": "unit",
     "art": {
-      "red3": "assets/unit8-red-3.png",
-      "blue2": "assets/unit8-blue-2.png",
-      "blue3": "assets/unit8-blue-3.png"
+      "red1": "assets/unit8-red-1.png?v=0.2.9",
+      "red2": "assets/unit8-red-2.png?v=0.2.9",
+      "red3": "assets/unit8-red-3.png?v=0.2.9",
+      "blue1": "assets/unit8-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit8-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit8-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -110,7 +132,14 @@ const CATALOG = [
     "icon": "♞",
     "short": "Lance",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit9-red-1.png?v=0.2.9",
+      "red2": "assets/unit9-red-2.png?v=0.2.9",
+      "red3": "assets/unit9-red-3.png?v=0.2.9",
+      "blue1": "assets/unit9-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit9-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit9-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit10",
@@ -119,12 +148,12 @@ const CATALOG = [
     "short": "Mage",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit10-red-1.png",
-      "red2": "assets/unit10-red-2.png",
-      "red3": "assets/unit10-red-3.png",
-      "blue1": "assets/unit10-blue-1.png",
-      "blue2": "assets/unit10-blue-2.png",
-      "blue3": "assets/unit10-blue-3.png"
+      "red1": "assets/unit10-red-1.png?v=0.2.9",
+      "red2": "assets/unit10-red-2.png?v=0.2.9",
+      "red3": "assets/unit10-red-3.png?v=0.2.9",
+      "blue1": "assets/unit10-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit10-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit10-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -134,12 +163,12 @@ const CATALOG = [
     "short": "Priest",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit11-red-1.png",
-      "red2": "assets/unit11-red-2.png",
-      "red3": "assets/unit11-red-3.png",
-      "blue1": "assets/unit11-blue-1.png",
-      "blue2": "assets/unit11-blue-2.png",
-      "blue3": "assets/unit11-blue-3.png"
+      "red1": "assets/unit11-red-1.png?v=0.2.9",
+      "red2": "assets/unit11-red-2.png?v=0.2.9",
+      "red3": "assets/unit11-red-3.png?v=0.2.9",
+      "blue1": "assets/unit11-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit11-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit11-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -149,12 +178,12 @@ const CATALOG = [
     "short": "Medic",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit12-red-1.png",
-      "red2": "assets/unit12-red-2.png",
-      "red3": "assets/unit12-red-3.png",
-      "blue1": "assets/unit12-blue-1.png",
-      "blue2": "assets/unit12-blue-2.png",
-      "blue3": "assets/unit12-blue-3.png"
+      "red1": "assets/unit12-red-1.png?v=0.2.9",
+      "red2": "assets/unit12-red-2.png?v=0.2.9",
+      "red3": "assets/unit12-red-3.png?v=0.2.9",
+      "blue1": "assets/unit12-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit12-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit12-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -164,12 +193,12 @@ const CATALOG = [
     "short": "Necro",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit13-red-1.png",
-      "red2": "assets/unit13-red-2.png",
-      "red3": "assets/unit13-red-3.png",
-      "blue1": "assets/unit13-blue-1.png",
-      "blue2": "assets/unit13-blue-2.png",
-      "blue3": "assets/unit13-blue-3.png"
+      "red1": "assets/unit13-red-1.png?v=0.2.9",
+      "red2": "assets/unit13-red-2.png?v=0.2.9",
+      "red3": "assets/unit13-red-3.png?v=0.2.9",
+      "blue1": "assets/unit13-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit13-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit13-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -179,12 +208,12 @@ const CATALOG = [
     "short": "Farmer",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit14-red-1.png",
-      "red2": "assets/unit14-red-2.png",
-      "red3": "assets/unit14-red-3.png",
-      "blue1": "assets/unit14-blue-1.png",
-      "blue2": "assets/unit14-blue-2.png",
-      "blue3": "assets/unit14-blue-3.png"
+      "red1": "assets/unit14-red-1.png?v=0.2.9",
+      "red2": "assets/unit14-red-2.png?v=0.2.9",
+      "red3": "assets/unit14-red-3.png?v=0.2.9",
+      "blue1": "assets/unit14-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit14-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit14-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -194,12 +223,12 @@ const CATALOG = [
     "short": "Artill.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit15-red-1.png",
-      "red2": "assets/unit15-red-2.png",
-      "red3": "assets/unit15-red-3.png",
-      "blue1": "assets/unit15-blue-1.png",
-      "blue2": "assets/unit15-blue-2.png",
-      "blue3": "assets/unit15-blue-3.png"
+      "red1": "assets/unit15-red-1.png?v=0.2.9",
+      "red2": "assets/unit15-red-2.png?v=0.2.9",
+      "red3": "assets/unit15-red-3.png?v=0.2.9",
+      "blue1": "assets/unit15-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit15-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit15-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -209,12 +238,12 @@ const CATALOG = [
     "short": "Mech.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit16-red-1.png",
-      "red2": "assets/unit16-red-2.png",
-      "red3": "assets/unit16-red-3.png",
-      "blue1": "assets/unit16-blue-1.png",
-      "blue2": "assets/unit16-blue-2.png",
-      "blue3": "assets/unit16-blue-3.png"
+      "red1": "assets/unit16-red-1.png?v=0.2.9",
+      "red2": "assets/unit16-red-2.png?v=0.2.9",
+      "red3": "assets/unit16-red-3.png?v=0.2.9",
+      "blue1": "assets/unit16-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit16-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit16-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -223,7 +252,14 @@ const CATALOG = [
     "icon": "◉",
     "short": "Oracle",
     "kind": "unit",
-    "art": {}
+    "art": {
+      "red1": "assets/unit17-red-1.png?v=0.2.9",
+      "red2": "assets/unit17-red-2.png?v=0.2.9",
+      "red3": "assets/unit17-red-3.png?v=0.2.9",
+      "blue1": "assets/unit17-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit17-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit17-blue-3.png?v=0.2.9"
+    }
   },
   {
     "id": "unit18",
@@ -232,12 +268,12 @@ const CATALOG = [
     "short": "Thief",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit18-red-1.png",
-      "red2": "assets/unit18-red-2.png",
-      "red3": "assets/unit18-red-3.png",
-      "blue1": "assets/unit18-blue-1.png",
-      "blue2": "assets/unit18-blue-2.png",
-      "blue3": "assets/unit18-blue-3.png"
+      "red1": "assets/unit18-red-1.png?v=0.2.9",
+      "red2": "assets/unit18-red-2.png?v=0.2.9",
+      "red3": "assets/unit18-red-3.png?v=0.2.9",
+      "blue1": "assets/unit18-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit18-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit18-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -247,11 +283,12 @@ const CATALOG = [
     "short": "Strat.",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit19-red-1.png",
-      "red2": "assets/unit19-red-2.png",
-      "red3": "assets/unit19-red-3.png",
-      "blue1": "assets/unit19-blue-1.png",
-      "blue3": "assets/unit19-blue-3.png"
+      "red1": "assets/unit19-red-1.png?v=0.2.9",
+      "red2": "assets/unit19-red-2.png?v=0.2.9",
+      "red3": "assets/unit19-red-3.png?v=0.2.9",
+      "blue1": "assets/unit19-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit19-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit19-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -261,27 +298,27 @@ const CATALOG = [
     "short": "Shop",
     "kind": "unit",
     "art": {
-      "red1": "assets/unit20-red-1.png",
-      "red2": "assets/unit20-red-2.png",
-      "red3": "assets/unit20-red-3.png",
-      "blue1": "assets/unit20-blue-1.png",
-      "blue2": "assets/unit20-blue-2.png",
-      "blue3": "assets/unit20-blue-3.png"
+      "red1": "assets/unit20-red-1.png?v=0.2.9",
+      "red2": "assets/unit20-red-2.png?v=0.2.9",
+      "red3": "assets/unit20-red-3.png?v=0.2.9",
+      "blue1": "assets/unit20-blue-1.png?v=0.2.9",
+      "blue2": "assets/unit20-blue-2.png?v=0.2.9",
+      "blue3": "assets/unit20-blue-3.png?v=0.2.9"
     }
   },
   {
-    "id": "ritual",
-    "name": "Ritual Caster",
-    "short": "Ritual",
-    "icon": "✧",
+    "id": "bard",
+    "name": "Bard",
+    "short": "Bard",
+    "icon": "♫",
     "kind": "unit",
     "art": {
-      "red1": "assets/ritual-red-1.png",
-      "red2": "assets/ritual-red-2.png",
-      "red3": "assets/ritual-red-3.png",
-      "blue1": "assets/ritual-blue-1.png",
-      "blue2": "assets/ritual-blue-2.png",
-      "blue3": "assets/ritual-blue-3.png"
+      "red1": "assets/bard-red-1.png?v=0.2.9",
+      "red2": "assets/bard-red-2.png?v=0.2.9",
+      "red3": "assets/bard-red-3.png?v=0.2.9",
+      "blue1": "assets/bard-blue-1.png?v=0.2.9",
+      "blue2": "assets/bard-blue-2.png?v=0.2.9",
+      "blue3": "assets/bard-blue-3.png?v=0.2.9"
     }
   },
   {
@@ -306,7 +343,10 @@ const CATALOG = [
     "icon": "●",
     "short": "Cannon",
     "kind": "marker",
-    "art": {}
+    "art": {
+      "red1": "assets/cannon.png?v=0.2.9",
+      "blue1": "assets/cannon.png?v=0.2.9"
+    }
   },
   {
     "id": "woodwall",
@@ -343,7 +383,8 @@ const CATALOG = [
 ];
 
 const WIDTH=31,HEIGHT=21;
-const types=new Set(CATALOG.map(x=>x.id));
+// Retired pieces remain readable in old saves, but cannot be created.
+const types=new Set([...CATALOG.map(x=>x.id),'ritual']);
 const copy=x=>JSON.parse(JSON.stringify(x));
 function emptyBoard(){return {width:WIDTH,height:HEIGHT,pieces:[
  {id:'fixed-base-red',type:'base',team:'red',label:'B',x:1,y:10,w:1,h:1,status:'normal',copyNo:1,fixed:true},
@@ -356,11 +397,15 @@ function emptyBoard(){return {width:WIDTH,height:HEIGHT,pieces:[
 ],nextNumber:1};}
 function validateBoard(b){
  if(!b||b.width!==WIDTH||b.height!==HEIGHT||!Array.isArray(b.pieces)||b.pieces.length>500)throw Error('Expected a 31 × 21 board with at most 500 pieces.');
- const ids=new Set();
+ const ids=new Set(),cannonTeams=new Set();
  for(const p of b.pieces){
   if(!p||typeof p.id!=='string'||p.id.length>80||ids.has(p.id)||!types.has(p.type))throw Error('Invalid or duplicate piece.');ids.add(p.id);
   if(!['red','blue','neutral'].includes(p.team)||!['normal','defeated','captured'].includes(p.status))throw Error('Invalid piece colour or status.');
   if(!Number.isInteger(p.copyNo)||p.copyNo<1||p.copyNo>99)throw Error('Invalid piece number.');
+  if(p.type==='cannon'){
+   if(!['red','blue'].includes(p.team)||cannonTeams.has(p.team))throw Error('Each side may have only one cannon, including pieces in reserve.');
+   cannonTeams.add(p.team);
+  }
   if(p.fixed!==undefined&&!Boolean(p.fixed))throw Error('Invalid fixed marker.');
   if(['woodwall','stonewall','ironwall'].includes(p.type)&&!((p.w===5&&p.h===1)||(p.w===1&&p.h===5)))throw Error('Walls must be exactly five squares, horizontal or vertical.');
   if(typeof p.label!=='string'||p.label.length>40)throw Error('Piece labels must be 40 characters or fewer.');
@@ -441,6 +486,7 @@ const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{toast('
 let room=null,session=null,local=false,localState=null,team='red',selected=null,placing=null,flipped=false,cell=30,fit=true,busy=false,connected=false,pingMode=false,rulerMode=false,rulerOrigin=null,privateRuler=null,publicRuler=null;
 let socket=null,retry=null,heartbeat=null,toastTimer=null,generation=0,dragData=null,lastDrag=0,previousPositions=new Map();
 const start=new URL(location.href);el('api').value=start.searchParams.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev');el('name').value=read('kg-board-name','');el('code').value=start.searchParams.get('room')||'';
+el('update').onclick=()=>{const u=new URL(location.href);u.searchParams.set('kg_update',Date.now().toString());location.replace(u.href);};
 function toast(text){el('toast').textContent=text;el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el('toast').hidden=true,6500);}
 function server(){const u=new URL(el('api').value.trim());if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))throw Error('Enter the HTTPS URL of the new board Worker.');return u.origin;}
 const key=(api,code)=>`kg-board-v2:${api}:${code}`;
@@ -455,7 +501,7 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.7 Worker first.');
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.9 Worker first.');
   local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
@@ -488,7 +534,7 @@ el('rulerRadius').oninput=()=>{if(rulerOrigin){const p=room?.board.pieces.find(p
 el('rulerScope').onchange=()=>{if(rulerOrigin){const p=room?.board.pieces.find(p=>p.id===rulerOrigin);if(p)setRulerOrigin(p);}};
 function graphic(t,colour,n){const path=t.art?.[colour+n];if(path){const im=document.createElement('img');im.src=path;im.alt=`${colour} ${t.name} ${n}`;im.draggable=false;im.className='token-art';return im;}const s=document.createElement('span');s.className='placeholder';s.textContent=t.id==='cannon'?'CANNON':`${t.icon} ${n}`;s.title=`${t.name} ${n} — placeholder`;return s;}
 function renderCatalog(){el('ownTeam').textContent=`${team.toUpperCase()} PIECES`;el('ownTeam').className='teamchoices '+team+'text';const list=el('catalog');list.replaceChildren();const q=el('search').value.toLowerCase();
- for(const t of CATALOG.filter(t=>!['base','giving'].includes(t.id)&&t.name.toLowerCase().includes(q))){const row=document.createElement('div');row.className='catalog-row';const label=document.createElement('span');label.textContent=t.name;row.append(label);const tokens=document.createElement('div');tokens.className='token-row';for(let n=1;n<=(t.id==='unit1'?1:3);n++){const existing=room.board.pieces.find(p=>p.type===t.id&&p.team===team&&p.copyNo===n);const b=button('',()=>{if(!editable())return toast('Reconnect, or click Not ready to edit setup.');if(existing){selected=existing.id;placing=null;}else{placing={type:t.id,copyNo:n};selected=null;}render();},'tray-token '+team+(existing?' used':''));b.title=`${t.name} ${n}${existing?' (already placed)':''}`;b.setAttribute('aria-label',`${t.name} ${n}`);b.append(graphic(t,team,n));b.draggable=true;b.ondragstart=e=>{if(!editable()){e.preventDefault();return;}dragData=existing?{id:existing.id}:{type:t.id,copyNo:n};e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};b.ondragend=()=>dragData=null;tokens.append(b);}row.append(tokens);list.append(row);}}
+ for(const t of CATALOG.filter(t=>!['base','giving'].includes(t.id)&&t.name.toLowerCase().includes(q))){const row=document.createElement('div');row.className='catalog-row';const label=document.createElement('span');label.textContent=t.name;row.append(label);const tokens=document.createElement('div');tokens.className='token-row';for(let n=1;n<=(['unit1','cannon'].includes(t.id)?1:3);n++){const existing=room.board.pieces.find(p=>p.type===t.id&&p.team===team&&p.copyNo===n);const b=button('',()=>{if(!editable())return toast('Reconnect, or click Not ready to edit setup.');if(existing){selected=existing.id;placing=null;}else{placing={type:t.id,copyNo:n};selected=null;}render();},'tray-token '+team+(existing?' used':''));b.title=`${t.name} ${n}${existing?' (already placed)':''}`;b.setAttribute('aria-label',`${t.name} ${n}`);b.append(graphic(t,team,n));b.draggable=true;b.ondragstart=e=>{if(!editable()){e.preventDefault();return;}dragData=existing?{id:existing.id}:{type:t.id,copyNo:n};e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};b.ondragend=()=>dragData=null;tokens.append(b);}row.append(tokens);list.append(row);}}
 el('search').oninput=renderCatalog;
 function view(x,y,w=1,h=1){return flipped?{x:WIDTH-x-w,y:HEIGHT-y-h}:{x,y};}
 function at(x,y){return room.board.pieces.filter(p=>p.x!==null&&x>=p.x&&x<p.x+p.w&&y>=p.y&&y<p.y+p.h);}
@@ -504,7 +550,7 @@ function renderBoard(){const board=el('board'),next=new Map();board.replaceChild
  for(let y=0;y<HEIGHT;y++)for(let x=0;x<WIDTH;x++){const v=view(x,y),b=button('',e=>squareClick(x,y,e),'cell'+((x+y)%2?' alt':''));b.style.left=`${(v.x+1)*cell}px`;b.style.top=`${(v.y+1)*cell}px`;b.dataset.x=x;b.dataset.y=y;b.setAttribute('role','gridcell');b.setAttribute('aria-label',coord(x,y));board.append(b);}
  const measure=privateRuler||publicRuler,origin=measure&&room.board.pieces.find(p=>p.id===measure.id);if(origin&&origin.x!==null)for(let y=Math.max(0,origin.y-measure.radius);y<=Math.min(HEIGHT-1,origin.y+origin.h-1+measure.radius);y++)for(let x=Math.max(0,origin.x-measure.radius);x<=Math.min(WIDTH-1,origin.x+origin.w-1+measure.radius);x++)if(Math.max(Math.abs(x-origin.x),Math.abs(y-origin.y))<=measure.radius){const v=view(x,y),mark=document.createElement('span');mark.className='ruler-cell';mark.style.left=`${(v.x+1)*cell}px`;mark.style.top=`${(v.y+1)*cell}px`;mark.style.width=`${cell}px`;mark.style.height=`${cell}px`;board.append(mark);}
  const ordered=[...room.board.pieces].sort((a,b)=>(b.w*b.h-a.w*a.h)||((a.id===selected?1:0)-(b.id===selected?1:0)));
- for(const p of ordered){if(p.x===null)continue;const t=CATALOG.find(t=>t.id===p.type),v=view(p.x,p.y,p.w,p.h),d=document.createElement('div');d.className=`piece ${p.team} ${p.status}${p.id===selected?' selected':''}${p.type==='cannon'?' cannon-object':''}${p.id.startsWith('fixed-base-')?' fixed-base':''}${p.type==='giving'?' fixed-giving':''}`;d.dataset.piece=p.id;d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label',`${p.team} ${p.label} at ${coord(p.x,p.y)}`);d.title=`${p.label} · ${coord(p.x,p.y)}`;const left=(v.x+1)*cell+2,top=(v.y+1)*cell+2;Object.assign(d.style,{left:`${left}px`,top:`${top}px`,width:`${p.w*cell-4}px`,height:`${p.h*cell-4}px`});if(p.id.startsWith('fixed-base-')||p.type==='giving'){const fixedLabel=document.createElement('span');fixedLabel.className='fixed-label';fixedLabel.textContent=p.type==='giving'?'GT':'B';d.append(fixedLabel);}else d.append(graphic(t,p.team,p.copyNo));
+ for(const p of ordered){if(p.x===null)continue;const t=(CATALOG.find(t=>t.id===p.type)||{id:p.type,name:'Retired unit',icon:'✧',art:{}}),v=view(p.x,p.y,p.w,p.h),d=document.createElement('div');d.className=`piece ${p.team} ${p.status}${p.id===selected?' selected':''}${p.type==='cannon'?' cannon-object':''}${p.id.startsWith('fixed-base-')?' fixed-base':''}${p.type==='giving'?' fixed-giving':''}`;d.dataset.piece=p.id;d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label',`${p.team} ${p.label} at ${coord(p.x,p.y)}`);d.title=`${p.label} · ${coord(p.x,p.y)}`;const left=(v.x+1)*cell+2,top=(v.y+1)*cell+2;Object.assign(d.style,{left:`${left}px`,top:`${top}px`,width:`${p.w*cell-4}px`,height:`${p.h*cell-4}px`});if(p.id.startsWith('fixed-base-')||p.type==='giving'){const fixedLabel=document.createElement('span');fixedLabel.className='fixed-label';fixedLabel.textContent=p.type==='giving'?'GT':'B';d.append(fixedLabel);}else d.append(graphic(t,p.team,p.copyNo));
  if(!p.fixed&&!t.art?.[p.team+p.copyNo]){const label=document.createElement('span');label.className='tiny';label.textContent=p.type==='cannon'?`Object ${p.copyNo}`:p.label;d.append(label);}
  if(p.status!=='normal'){const m=document.createElement('span');m.className='statusMark';m.textContent=p.status==='defeated'?'×':'⚑';d.append(m);}const n=at(p.x,p.y).length;if(n>1){const badge=document.createElement('span');badge.className='stackbadge';badge.textContent=n;d.append(badge);}
  d.onclick=e=>{e.stopPropagation();if(pingMode||e.shiftKey){ping(p.x,p.y);return;}if(rulerMode){setRulerOrigin(p);return;}if(p.fixed)return;if(p.type.endsWith('wall')){const now=performance.now();if(wallClick?.id===p.id&&now-wallClick.at<500){wallClick=null;if(editable())act({kind:'rotate',id:p.id});return;}wallClick={id:p.id,at:now};}else wallClick=null;selected=p.id;placing=null;render();};d.onkeydown=e=>{if(e.key==='Enter'&&!p.fixed){selected=p.id;placing=null;render();}};
@@ -520,7 +566,7 @@ function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id==
  el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play';el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
  const p=room.board.pieces.find(p=>p.id===selected);el('selection').hidden=!p;
  el('hint').textContent=placing?`Drag or click to place ${CATALOG.find(t=>t.id===placing.type).name} ${placing.copyNo}.`:p?`${p.label} selected. ${p.type.endsWith('wall')?'Drag or use cursor keys to move; double-click to rotate.':p.team===team?'Drag, use the cursor keys, or use the controls below.':'Opponent’s piece — you may move it after reveal with drag or the cursor keys.'}`:room.phase==='setup'?'Place your pieces privately. Both players must click Ready to reveal.':'Both players may move any piece. Click a piece, then use the cursor keys to move it one square.';
- if(p){el('selectedName').textContent=CATALOG.find(t=>t.id===p.type).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('rotate').disabled=!editable()||p.fixed||(p.team!==team&&(room.phase!=='play'||!p.type.endsWith('wall')));el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
+ if(p){el('selectedName').textContent=(CATALOG.find(t=>t.id===p.type)||{id:p.type,name:'Retired unit',icon:'✧',art:{}}).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('rotate').disabled=!editable()||p.fixed||(p.team!==team&&(room.phase!=='play'||!p.type.endsWith('wall')));el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
  el('log').replaceChildren();for(const item of room.history){const p=document.createElement('p');p.textContent=item.text;el('log').append(p);}
 }
 function resize(){if(!room)return;if(fit){const v=el('viewport');cell=Math.max(14,Math.floor((v.clientWidth-30)/32));}previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}

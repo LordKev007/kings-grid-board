@@ -1,6 +1,7 @@
 import {CATALOG} from './catalog.js';
 export const WIDTH=31,HEIGHT=21;
-const types=new Set(CATALOG.map(x=>x.id));
+// Retired pieces remain readable in old saves, but cannot be created.
+const types=new Set([...CATALOG.map(x=>x.id),'ritual']);
 export const copy=x=>JSON.parse(JSON.stringify(x));
 export function emptyBoard(){return {width:WIDTH,height:HEIGHT,pieces:[
  {id:'fixed-base-red',type:'base',team:'red',label:'B',x:1,y:10,w:1,h:1,status:'normal',copyNo:1,fixed:true},
@@ -13,11 +14,15 @@ export function emptyBoard(){return {width:WIDTH,height:HEIGHT,pieces:[
 ],nextNumber:1};}
 export function validateBoard(b){
  if(!b||b.width!==WIDTH||b.height!==HEIGHT||!Array.isArray(b.pieces)||b.pieces.length>500)throw Error('Expected a 31 × 21 board with at most 500 pieces.');
- const ids=new Set();
+ const ids=new Set(),cannonTeams=new Set();
  for(const p of b.pieces){
   if(!p||typeof p.id!=='string'||p.id.length>80||ids.has(p.id)||!types.has(p.type))throw Error('Invalid or duplicate piece.');ids.add(p.id);
   if(!['red','blue','neutral'].includes(p.team)||!['normal','defeated','captured'].includes(p.status))throw Error('Invalid piece colour or status.');
   if(!Number.isInteger(p.copyNo)||p.copyNo<1||p.copyNo>99)throw Error('Invalid piece number.');
+  if(p.type==='cannon'){
+   if(!['red','blue'].includes(p.team)||cannonTeams.has(p.team))throw Error('Each side may have only one cannon, including pieces in reserve.');
+   cannonTeams.add(p.team);
+  }
   if(p.fixed!==undefined&&!Boolean(p.fixed))throw Error('Invalid fixed marker.');
   if(['woodwall','stonewall','ironwall'].includes(p.type)&&!((p.w===5&&p.h===1)||(p.w===1&&p.h===5)))throw Error('Walls must be exactly five squares, horizontal or vertical.');
   if(typeof p.label!=='string'||p.label.length>40)throw Error('Piece labels must be 40 characters or fewer.');
