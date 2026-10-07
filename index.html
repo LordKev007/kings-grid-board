@@ -5,8 +5,21 @@
 .ruler-controls{display:flex;align-items:center;gap:7px}.ruler-controls label{display:flex;align-items:center;gap:4px;color:#b9c3ca;font-size:11px}.ruler-controls input,.ruler-controls select{width:64px;padding:6px;font-size:11px}.ruler-controls select{width:94px}.ruler-cell{position:absolute;z-index:1;pointer-events:none;background:#f1c75b38;border:1px solid #f1c75b99;box-shadow:inset 0 0 0 1px #fff2}
 
 #viewport.panning,#viewport.panning *{cursor:grabbing!important}#viewport:fullscreen{width:100vw;height:100vh;max-height:none;border:0;border-radius:0;flex:none;padding:14px;overflow:auto;background:#10181f}
+.wall-health .placeholder,.wall-health .tiny{display:none}
+.wall-hp-label{position:relative;z-index:1;font:bold calc(var(--cell)*.40) system-ui;color:white;text-shadow:0 1px 2px #000;white-space:nowrap}
+.wall-vertical .wall-hp-label{writing-mode:vertical-rl}
+.wall-hp-track{position:absolute;background:#101b22;border-radius:3px;overflow:hidden;pointer-events:none}
+.wall-horizontal .wall-hp-track{left:3px;right:3px;bottom:2px;height:4px}
+.wall-vertical .wall-hp-track{top:3px;bottom:3px;left:2px;width:4px}
+.wall-hp-track>span{display:block;background:#78d997;width:100%;height:100%}
+.wall-zero{outline:2px dashed #f17d73}
+.wall-hp-editor{position:absolute;z-index:40;width:200px;padding:8px;background:#172b36;color:#fff;border:1px solid #8ba8b6;border-radius:7px;box-shadow:0 3px 12px #0008;font:12px system-ui}
+.wall-hp-editor strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:5px}
+.wall-hp-editor>div{display:flex;gap:6px;align-items:center}
+.wall-hp-editor input{width:112px;min-width:0;padding:0;accent-color:#78d997}
+.wall-hp-editor button{width:28px;height:28px;padding:0;font-size:20px}
 </style></head><body>
-<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.9</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
+<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.10</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
 <main id="welcome"><section class="intro"><div class="eyebrow">PULL UP A CHAIR</div><h2>Same board.<br>Different places.</h2><p>Move the pieces here. Keep your units on your iPads.<br>Bring your own voice call and settle in for a game.</p><div class="mini-grid"><span>♛</span><span>♞</span><span>⚔</span></div><button id="local" class="secondary">Try the board on this computer</button><p class="muted">Local practice is saved only in this browser.</p></section><section class="joincard"><h3>Your table</h3><label>Board server URL<input id="api" type="url" placeholder="https://kings-grid-board.…workers.dev" autocomplete="url"></label><p class="muted">Use the new board Worker’s URL from Cloudflare.</p><label>Your name<input id="name" maxlength="30" placeholder="Kevin or Bubs" autocomplete="given-name"></label><div class="choose"><label><input type="radio" name="team" value="red"> <b class="redtext">Red</b></label><label><input type="radio" name="team" value="blue"> <b class="bluetext">Blue</b></label></div><button id="create" class="primary">Create a table</button><div class="divider">OR JOIN A TABLE</div><label>Room code<input id="code" maxlength="8" placeholder="8-character code" autocapitalize="characters"></label><button id="join">Join / resume table</button><p id="setupError" role="alert"></p></section></main>
 <main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><button id="flip">Flip view</button><button id="fullscreen" hidden>Board fullscreen</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
 const CATALOG = [
@@ -383,6 +396,12 @@ const CATALOG = [
 ];
 
 const WIDTH=31,HEIGHT=21;
+const wallMaxHP=type=>type==='woodwall'?3:type==='stonewall'?6:null;
+const wallHP=p=>p.hp===undefined?wallMaxHP(p.type):p.hp;
+function saveFilename(code,date=new Date()){
+ const pad=n=>String(n).padStart(2,'0');
+ return `Kings_Grid_${code}_${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.json`;
+}
 // Retired pieces remain readable in old saves, but cannot be created.
 const types=new Set([...CATALOG.map(x=>x.id),'ritual']);
 const copy=x=>JSON.parse(JSON.stringify(x));
@@ -402,6 +421,7 @@ function validateBoard(b){
   if(!p||typeof p.id!=='string'||p.id.length>80||ids.has(p.id)||!types.has(p.type))throw Error('Invalid or duplicate piece.');ids.add(p.id);
   if(!['red','blue','neutral'].includes(p.team)||!['normal','defeated','captured'].includes(p.status))throw Error('Invalid piece colour or status.');
   if(!Number.isInteger(p.copyNo)||p.copyNo<1||p.copyNo>99)throw Error('Invalid piece number.');
+  if(p.hp!==undefined&&(wallMaxHP(p.type)===null||!Number.isInteger(p.hp)||p.hp<0||p.hp>wallMaxHP(p.type)))throw Error('Invalid wall health.');
   if(p.type==='cannon'){
    if(!['red','blue'].includes(p.team)||cannonTeams.has(p.team))throw Error('Each side may have only one cannon, including pieces in reserve.');
    cannonTeams.add(p.team);
@@ -422,9 +442,11 @@ function changeBoard(original,action){
  case 'add': {
   const t=CATALOG.find(t=>t.id===action.type);if(!t)throw Error('Unknown piece type.');
   const p={id:action.id,type:t.id,team:action.team,label:action.label||`${t.short} ${action.copyNo??1}`,x:action.x??null,y:action.y??null,w:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?1:5):1,h:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?5:1):1,status:'normal',copyNo:action.copyNo??1};
+  if(wallMaxHP(p.type)!==null)p.hp=wallMaxHP(p.type);
   b.nextNumber++;b.pieces.push(p);description=`Added ${p.label}`;break;
  }
  case 'move': {const p=find();p.x=action.x;p.y=action.y;description=`Moved ${p.label}${p.x===null?' to reserve':` to ${coord(p.x,p.y)}`}`;break;}
+ case 'wallHealth': {const p=find(),max=wallMaxHP(p.type);if(max===null)throw Error('Only wood and stone walls have adjustable health.');if(!Number.isInteger(action.hp)||action.hp<0||action.hp>max)throw Error(`Health must be between 0 and ${max}.`);p.hp=action.hp;description=`${p.label}: ${p.hp}/${max} HP`;break;}
  case 'edit': {const p=find();for(const k of ['label','team','status'])if(action[k]!==undefined)p[k]=action[k];description=`Updated ${p.label}`;break;}
  case 'rotate': {const p=find();[p.w,p.h]=[p.h,p.w];description=`Rotated ${p.label}`;break;}
  case 'remove': {description=`Removed ${find().label}`;b.pieces=b.pieces.filter(p=>p.id!==action.id);break;}
@@ -457,6 +479,7 @@ function applyAction(r,team,a){
    if(r.phase==='setup')r.board.pieces=[...r.board.pieces.filter(p=>p.fixed||p.team!==team),...last.pieces.filter(p=>!p.fixed)];else {r.board=last;r.undo[other(team)]=[];}description='Undid last edit';
   }else{
    const piece=r.board.pieces.find(p=>p.id===a.id);
+   if(a.kind==='wallHealth'&&(!piece||piece.fixed||(r.phase==='setup'&&piece.team!==team)))throw Error('You cannot adjust that wall during this phase.');
    if(['edit','remove'].includes(a.kind)&&(!piece||piece.team!==team))throw Error('Select one of your own pieces.');
    if(a.kind==='move'&&(!piece||piece.fixed))throw Error('That piece cannot be moved.');
    if(a.kind==='move'&&r.phase==='setup'&&piece.team!==team)throw Error('Only move your own pieces during setup.');
@@ -501,7 +524,7 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.9 Worker first.');
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.10 Worker first.');
   local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
@@ -544,6 +567,31 @@ function squareClick(x,y,e){if(pingMode||e.shiftKey){ping(x,y);return;}if(placin
 el('board').ondragover=e=>{if(!editable())return;e.preventDefault();e.dataTransfer.dropEffect='move';const pos=squareFrom(e);if(pos&&dragData?.id&&Date.now()-lastDrag>90){lastDrag=Date.now();if(!local&&room.phase==='play'&&socket?.readyState===1)socket.send(JSON.stringify({kind:'drag',id:dragData.id,...pos}));}};
 el('board').ondrop=e=>{e.preventDefault();const pos=squareFrom(e);let data=dragData;try{data=data||JSON.parse(e.dataTransfer.getData('application/json'));}catch{}dragData=null;if(pos&&data)place(data,pos.x,pos.y);};
 let wallClick=null;
+function showWallHealth(p,d){
+ const max=wallMaxHP(p.type),hp=wallHP(p),vertical=p.h>p.w;
+ d.classList.add('wall-health',vertical?'wall-vertical':'wall-horizontal');
+ const label=document.createElement('span');label.className='wall-hp-label';label.textContent=max===null?'∞':`${hp}/${max}`;d.append(label);
+ d.title+=max===null?' · Invincible':` · ${hp}/${max} HP`;
+ const bar=document.createElement('span');bar.className='wall-hp-track';const fill=document.createElement('span');fill.style[vertical?'height':'width']=`${max===null?100:100*hp/max}%`;bar.append(fill);d.append(bar);
+ if(max!==null&&hp===0)d.classList.add('wall-zero');
+}
+function renderWallEditor(board){
+ const p=room.board.pieces.find(p=>p.id===selected);if(!p||!p.type.endsWith('wall')||p.x===null)return;
+ const max=wallMaxHP(p.type);if(max===null)return;
+ const v=view(p.x,p.y,p.w,p.h),panel=document.createElement('div');panel.className='wall-hp-editor';panel.setAttribute('aria-label','Wall health controls');
+ panel.style.left=`${Math.max(cell,Math.min((v.x+1)*cell,(WIDTH+1)*cell-210))}px`;
+ panel.style.top=`${v.y>=3?(v.y+1)*cell-78:(v.y+p.h+1)*cell+4}px`;
+ const title=document.createElement('strong');title.textContent=`${p.label} · ${wallHP(p)}/${max} HP`;panel.append(title);
+ const controls=document.createElement('div'),slider=document.createElement('input');slider.type='range';slider.min=0;slider.max=max;slider.step=1;slider.value=wallHP(p);slider.setAttribute('aria-label',`${p.label} health`);
+ const set=hp=>act({kind:'wallHealth',id:p.id,hp});
+ const minus=button('−',()=>set(Math.max(0,wallHP(p)-1))),plus=button('+',()=>set(Math.min(max,wallHP(p)+1)));
+ minus.setAttribute('aria-label','Decrease wall health');plus.setAttribute('aria-label','Increase wall health');
+ slider.oninput=()=>{title.textContent=`${p.label} · ${slider.value}/${max} HP`;};slider.onchange=()=>set(Number(slider.value));
+ const allowed=editable();slider.disabled=!allowed;minus.disabled=!allowed||wallHP(p)===0;plus.disabled=!allowed||wallHP(p)===max;
+ controls.append(minus,slider,plus);panel.append(controls);
+ for(const name of ['click','dblclick','pointerdown','keydown','keyup'])panel.addEventListener(name,e=>e.stopPropagation());
+ panel.addEventListener('dragstart',e=>{e.preventDefault();e.stopPropagation();});board.append(panel);
+}
 function renderBoard(){const board=el('board'),next=new Map();board.replaceChildren();
  for(let x=0;x<WIDTH;x++){const a=document.createElement('span');a.className='axis';a.textContent=coord(flipped?WIDTH-1-x:x,0).replace(/\d/g,'');a.style.left=`${(x+1)*cell}px`;a.style.top='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++){const a=document.createElement('span');a.className='axis';a.textContent=String(flipped?HEIGHT-y:y+1);a.style.top=`${(y+1)*cell}px`;a.style.left='0';board.append(a);}
@@ -552,11 +600,12 @@ function renderBoard(){const board=el('board'),next=new Map();board.replaceChild
  const ordered=[...room.board.pieces].sort((a,b)=>(b.w*b.h-a.w*a.h)||((a.id===selected?1:0)-(b.id===selected?1:0)));
  for(const p of ordered){if(p.x===null)continue;const t=(CATALOG.find(t=>t.id===p.type)||{id:p.type,name:'Retired unit',icon:'✧',art:{}}),v=view(p.x,p.y,p.w,p.h),d=document.createElement('div');d.className=`piece ${p.team} ${p.status}${p.id===selected?' selected':''}${p.type==='cannon'?' cannon-object':''}${p.id.startsWith('fixed-base-')?' fixed-base':''}${p.type==='giving'?' fixed-giving':''}`;d.dataset.piece=p.id;d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label',`${p.team} ${p.label} at ${coord(p.x,p.y)}`);d.title=`${p.label} · ${coord(p.x,p.y)}`;const left=(v.x+1)*cell+2,top=(v.y+1)*cell+2;Object.assign(d.style,{left:`${left}px`,top:`${top}px`,width:`${p.w*cell-4}px`,height:`${p.h*cell-4}px`});if(p.id.startsWith('fixed-base-')||p.type==='giving'){const fixedLabel=document.createElement('span');fixedLabel.className='fixed-label';fixedLabel.textContent=p.type==='giving'?'GT':'B';d.append(fixedLabel);}else d.append(graphic(t,p.team,p.copyNo));
  if(!p.fixed&&!t.art?.[p.team+p.copyNo]){const label=document.createElement('span');label.className='tiny';label.textContent=p.type==='cannon'?`Object ${p.copyNo}`:p.label;d.append(label);}
+ if(p.type.endsWith('wall'))showWallHealth(p,d);
  if(p.status!=='normal'){const m=document.createElement('span');m.className='statusMark';m.textContent=p.status==='defeated'?'×':'⚑';d.append(m);}const n=at(p.x,p.y).length;if(n>1){const badge=document.createElement('span');badge.className='stackbadge';badge.textContent=n;d.append(badge);}
  d.onclick=e=>{e.stopPropagation();if(pingMode||e.shiftKey){ping(p.x,p.y);return;}if(rulerMode){setRulerOrigin(p);return;}if(p.fixed)return;if(p.type.endsWith('wall')){const now=performance.now();if(wallClick?.id===p.id&&now-wallClick.at<500){wallClick=null;if(editable())act({kind:'rotate',id:p.id});return;}wallClick={id:p.id,at:now};}else wallClick=null;selected=p.id;placing=null;render();};d.onkeydown=e=>{if(e.key==='Enter'&&!p.fixed){selected=p.id;placing=null;render();}};
  d.draggable=!p.fixed&&editable();d.ondragstart=e=>{if(p.fixed||!editable()){e.preventDefault();return;}dragData={id:p.id};selected=null;placing=null;e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';};d.ondragend=()=>dragData=null;board.append(d);
  const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
- }previousPositions=next;
+ }previousPositions=next;renderWallEditor(board);
 }
 function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
@@ -599,7 +648,7 @@ document.addEventListener('keyup',e=>{if(cursorKeys.has(e.key))cursorKeys.delete
 el('undo').onclick=()=>act({kind:'undo'});
 el('clear').onclick=()=>{if(confirm('Return all YOUR pieces to the tray?'))act({kind:'clear'});};
 el('reset').onclick=()=>{if(confirm('Reset the entire table for a new setup? This clears both armies from the board.')){selected=null;placing=null;act({kind:'reset'});}};
-el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-board-v2',board:room.board},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Kings_Grid_${room.code}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
+el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-board-v2',savedAt:new Date().toISOString(),board:room.board},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=saveFilename(room.code);a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
 el('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Save is too large.');const d=JSON.parse(await f.text());validateBoard(d.board);if(confirm('Replace the entire revealed board with this save?'))await act({kind:'import',board:d.board});}catch(err){toast(err.message);}e.target.value='';};
 async function copyLink(privateLink){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',session.code);u.searchParams.set('server',session.api);if(privateLink)u.hash=new URLSearchParams({resume:session.token}).toString();try{await navigator.clipboard.writeText(u.href);toast(privateLink?'Private resume link copied. Keep it for yourself.':'Invite copied. Send it to the other player.');}catch{prompt('Copy this '+(privateLink?'private resume link':'invite')+':',u.href);}}
 el('invite').onclick=()=>copyLink(false);el('resume').onclick=()=>copyLink(true);el('trayTab').onclick=()=>{el('tray').hidden=false;el('log').hidden=true;el('trayTab').classList.add('active');el('logTab').classList.remove('active');};el('logTab').onclick=()=>{el('tray').hidden=true;el('log').hidden=false;el('logTab').classList.add('active');el('trayTab').classList.remove('active');};
