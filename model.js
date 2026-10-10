@@ -1,5 +1,11 @@
 import {CATALOG} from './catalog.js';
 export const WIDTH=31,HEIGHT=21;
+export const wallMaxHP=type=>type==='woodwall'?3:type==='stonewall'?6:null;
+export const wallHP=p=>p.hp===undefined?wallMaxHP(p.type):p.hp;
+export function saveFilename(code,date=new Date()){
+ const pad=n=>String(n).padStart(2,'0');
+ return `Kings_Grid_${code}_${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.json`;
+}
 // Retired pieces remain readable in old saves, but cannot be created.
 const types=new Set([...CATALOG.map(x=>x.id),'ritual']);
 export const copy=x=>JSON.parse(JSON.stringify(x));
@@ -19,6 +25,7 @@ export function validateBoard(b){
   if(!p||typeof p.id!=='string'||p.id.length>80||ids.has(p.id)||!types.has(p.type))throw Error('Invalid or duplicate piece.');ids.add(p.id);
   if(!['red','blue','neutral'].includes(p.team)||!['normal','defeated','captured'].includes(p.status))throw Error('Invalid piece colour or status.');
   if(!Number.isInteger(p.copyNo)||p.copyNo<1||p.copyNo>99)throw Error('Invalid piece number.');
+  if(p.hp!==undefined&&(wallMaxHP(p.type)===null||!Number.isInteger(p.hp)||p.hp<0||p.hp>wallMaxHP(p.type)))throw Error('Invalid wall health.');
   if(p.type==='cannon'){
    if(!['red','blue'].includes(p.team)||cannonTeams.has(p.team))throw Error('Each side may have only one cannon, including pieces in reserve.');
    cannonTeams.add(p.team);
@@ -39,9 +46,11 @@ export function changeBoard(original,action){
  case 'add': {
   const t=CATALOG.find(t=>t.id===action.type);if(!t)throw Error('Unknown piece type.');
   const p={id:action.id,type:t.id,team:action.team,label:action.label||`${t.short} ${action.copyNo??1}`,x:action.x??null,y:action.y??null,w:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?1:5):1,h:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?5:1):1,status:'normal',copyNo:action.copyNo??1};
+  if(wallMaxHP(p.type)!==null)p.hp=wallMaxHP(p.type);
   b.nextNumber++;b.pieces.push(p);description=`Added ${p.label}`;break;
  }
  case 'move': {const p=find();p.x=action.x;p.y=action.y;description=`Moved ${p.label}${p.x===null?' to reserve':` to ${coord(p.x,p.y)}`}`;break;}
+ case 'wallHealth': {const p=find(),max=wallMaxHP(p.type);if(max===null)throw Error('Only wood and stone walls have adjustable health.');if(!Number.isInteger(action.hp)||action.hp<0||action.hp>max)throw Error(`Health must be between 0 and ${max}.`);p.hp=action.hp;description=`${p.label}: ${p.hp}/${max} HP`;break;}
  case 'edit': {const p=find();for(const k of ['label','team','status'])if(action[k]!==undefined)p[k]=action[k];description=`Updated ${p.label}`;break;}
  case 'rotate': {const p=find();[p.w,p.h]=[p.h,p.w];description=`Rotated ${p.label}`;break;}
  case 'remove': {description=`Removed ${find().label}`;b.pieces=b.pieces.filter(p=>p.id!==action.id);break;}

@@ -18,10 +18,24 @@
 .wall-hp-editor>div{display:flex;gap:6px;align-items:center}
 .wall-hp-editor input{width:112px;min-width:0;padding:0;accent-color:#78d997}
 .wall-hp-editor button{width:28px;height:28px;padding:0;font-size:20px}
+
+/* v0.2.11 animated battlefield underlay */
+.map-control{display:flex;grid-template-columns:auto auto;align-items:center;gap:6px;color:#9eacb7;font-size:11px;margin-left:2px}
+.map-control select{width:auto;max-width:170px;padding:7px 28px 7px 9px;font-size:12px;background:#1f2b34}
+#board{isolation:isolate}
+.map-layer{position:absolute;left:var(--cell);top:var(--cell);width:calc(var(--cell)*31);height:calc(var(--cell)*21);overflow:hidden;z-index:0;background:#0d141a;pointer-events:none;display:none}
+.map-layer.active{display:block}
+.map-layer iframe{position:absolute;left:50%;top:50%;width:121%;height:100%;transform:translate(-50%,-50%);border:0;pointer-events:none}
+#board.has-map .cell{background:rgba(224,214,191,.08);border-right-color:rgba(224,231,230,.58);border-bottom-color:rgba(224,231,230,.58);text-shadow:0 1px 2px #000}
+#board.has-map .cell.alt{background:rgba(16,24,31,.07)}
+#board.has-map .cell:hover,#board.has-map .cell.alt:hover{background:rgba(239,223,169,.28)}
+#board.has-map .axis{color:#c8d2d8;text-shadow:0 1px 2px #000}
+#board.has-map .ruler-cell{background:rgba(255,226,150,.28)}
+@media(max-width:850px){.map-control span{display:none}.map-control select{max-width:135px}}
 </style></head><body>
-<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.10</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
+<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.11</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
 <main id="welcome"><section class="intro"><div class="eyebrow">PULL UP A CHAIR</div><h2>Same board.<br>Different places.</h2><p>Move the pieces here. Keep your units on your iPads.<br>Bring your own voice call and settle in for a game.</p><div class="mini-grid"><span>♛</span><span>♞</span><span>⚔</span></div><button id="local" class="secondary">Try the board on this computer</button><p class="muted">Local practice is saved only in this browser.</p></section><section class="joincard"><h3>Your table</h3><label>Board server URL<input id="api" type="url" placeholder="https://kings-grid-board.…workers.dev" autocomplete="url"></label><p class="muted">Use the new board Worker’s URL from Cloudflare.</p><label>Your name<input id="name" maxlength="30" placeholder="Kevin or Bubs" autocomplete="given-name"></label><div class="choose"><label><input type="radio" name="team" value="red"> <b class="redtext">Red</b></label><label><input type="radio" name="team" value="blue"> <b class="bluetext">Blue</b></label></div><button id="create" class="primary">Create a table</button><div class="divider">OR JOIN A TABLE</div><label>Room code<input id="code" maxlength="8" placeholder="8-character code" autocapitalize="characters"></label><button id="join">Join / resume table</button><p id="setupError" role="alert"></p></section></main>
-<main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><button id="flip">Flip view</button><button id="fullscreen" hidden>Board fullscreen</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
+<main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><label class="map-control" title="Choose a shared animated battlefield"><span>Map</span><select id="mapSelect" aria-label="Battle map"><option value="classic">Classic</option><option value="forest_midday">Forest — Mid Day</option><option value="waterfall_ruins">Waterfall &amp; Ruins</option><option value="frozen_boughs">Frozen Boughs</option></select></label><button id="flip">Flip view</button><button id="fullscreen" hidden>Board fullscreen</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"><div id="mapLayer" class="map-layer" aria-hidden="true"></div></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
 const CATALOG = [
   {
     "id": "unit1",
@@ -459,11 +473,15 @@ function changeBoard(original,action){
 function coord(x,y){return `${x<26?String.fromCharCode(65+x):'A'+String.fromCharCode(65+x-26)}${y+1}`;}
 
 const other=t=>t==='red'?'blue':'red';
-function newRoom(code,name,team,token,first){return {code,board:emptyBoard(),players:[{name,team,token}],phase:'setup',ready:{red:false,blue:false},first:first||team,turn:first||team,revision:0,undo:{red:[],blue:[]},log:[],requests:[],tickets:[]};}
-function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup'){board.pieces=board.pieces.filter(p=>p.fixed||p.team===team);board.nextNumber=1;}return {code:r.code,board,players:r.players.map(({name,team})=>({name,team})),phase:r.phase,ready:r.ready,turn:r.turn,first:r.first,revision:r.revision,canUndo:r.undo[team].length>0,history:r.log.filter(l=>r.phase==='play'||l.team===team),myTeam:team};}
+function newRoom(code,name,team,token,first){return {code,board:emptyBoard(),backgroundMap:'classic',players:[{name,team,token}],phase:'setup',ready:{red:false,blue:false},first:first||team,turn:first||team,revision:0,undo:{red:[],blue:[]},log:[],requests:[],tickets:[]};}
+function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup'){board.pieces=board.pieces.filter(p=>p.fixed||p.team===team);board.nextNumber=1;}return {code:r.code,board,backgroundMap:r.backgroundMap||'classic',players:r.players.map(({name,team})=>({name,team})),phase:r.phase,ready:r.ready,turn:r.turn,first:r.first,revision:r.revision,canUndo:r.undo[team].length>0,history:r.log.filter(l=>r.phase==='play'||l.team===team),myTeam:team};}
 function applyAction(r,team,a){
  let description='';
- if(a.kind==='reset'){
+ if(a.kind==='map'){
+  const maps=new Set(['classic','forest_midday','waterfall_ruins','frozen_boughs']);
+  if(!maps.has(a.map))throw Error('Unknown battle map.');
+  r.backgroundMap=a.map;description=`Changed battlefield to ${a.map==='classic'?'Classic':a.map==='forest_midday'?'Forest — Mid Day':a.map==='waterfall_ruins'?'Waterfall & Ruins':'Frozen Boughs'}`;
+ }else if(a.kind==='reset'){
   r.board=emptyBoard();r.phase='setup';r.ready={red:false,blue:false};r.turn=r.first;r.undo={red:[],blue:[]};r.log=[];description='Reset the table for a new setup';
  }else if(a.kind==='ready'){
   if(r.phase!=='setup')throw Error('Setup has already finished.');r.ready[team]=!r.ready[team];
@@ -508,6 +526,23 @@ const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch
 const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{toast('Browser storage unavailable. Keep your private resume link and download saves.');}};
 let room=null,session=null,local=false,localState=null,team='red',selected=null,placing=null,flipped=false,cell=30,fit=true,busy=false,connected=false,pingMode=false,rulerMode=false,rulerOrigin=null,privateRuler=null,publicRuler=null;
 let socket=null,retry=null,heartbeat=null,toastTimer=null,generation=0,dragData=null,lastDrag=0,previousPositions=new Map();
+const BATTLE_MAPS={
+ classic:null,
+ forest_midday:'ePDq2nNW1sc',
+ waterfall_ruins:'DtsP5f_fYmk',
+ frozen_boughs:'OINIK45x7SQ'
+};
+function mapEmbedUrl(videoId){const q=new URLSearchParams({autoplay:'1',mute:'1',controls:'0',loop:'1',playlist:videoId,playsinline:'1',rel:'0',fs:'0',disablekb:'1'});return `https://www.youtube.com/embed/${videoId}?${q}`;}
+function renderMap(){
+ const board=el('board'),layer=el('mapLayer');if(!board||!layer)return;
+ const map=room?.backgroundMap||'classic',videoId=BATTLE_MAPS[map]||null;
+ board.classList.toggle('has-map',!!videoId);layer.classList.toggle('active',!!videoId);
+ const current=layer.dataset.videoId||'';
+ if(!videoId){if(current){layer.replaceChildren();layer.dataset.videoId='';}return;}
+ if(current===videoId)return;
+ const iframe=document.createElement('iframe');iframe.src=mapEmbedUrl(videoId);iframe.title='Animated King’s Grid battlefield';iframe.allow='autoplay; encrypted-media; picture-in-picture';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.tabIndex=-1;
+ layer.replaceChildren(iframe);layer.dataset.videoId=videoId;
+}
 const start=new URL(location.href);el('api').value=start.searchParams.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev');el('name').value=read('kg-board-name','');el('code').value=start.searchParams.get('room')||'';
 el('update').onclick=()=>{const u=new URL(location.href);u.searchParams.set('kg_update',Date.now().toString());location.replace(u.href);};
 function toast(text){el('toast').textContent=text;el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el('toast').hidden=true,6500);}
@@ -524,7 +559,7 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.10 Worker first.');
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.11 Worker first.');
   local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
@@ -592,7 +627,7 @@ function renderWallEditor(board){
  for(const name of ['click','dblclick','pointerdown','keydown','keyup'])panel.addEventListener(name,e=>e.stopPropagation());
  panel.addEventListener('dragstart',e=>{e.preventDefault();e.stopPropagation();});board.append(panel);
 }
-function renderBoard(){const board=el('board'),next=new Map();board.replaceChildren();
+function renderBoard(){const board=el('board'),next=new Map();for(const child of [...board.children])if(child.id!=='mapLayer')child.remove();renderMap();
  for(let x=0;x<WIDTH;x++){const a=document.createElement('span');a.className='axis';a.textContent=coord(flipped?WIDTH-1-x:x,0).replace(/\d/g,'');a.style.left=`${(x+1)*cell}px`;a.style.top='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++){const a=document.createElement('span');a.className='axis';a.textContent=String(flipped?HEIGHT-y:y+1);a.style.top=`${(y+1)*cell}px`;a.style.left='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++)for(let x=0;x<WIDTH;x++){const v=view(x,y),b=button('',e=>squareClick(x,y,e),'cell'+((x+y)%2?' alt':''));b.style.left=`${(v.x+1)*cell}px`;b.style.top=`${(v.y+1)*cell}px`;b.dataset.x=x;b.dataset.y=y;b.setAttribute('role','gridcell');b.setAttribute('aria-label',coord(x,y));board.append(b);}
@@ -607,7 +642,7 @@ function renderBoard(){const board=el('board'),next=new Map();board.replaceChild
  const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
  }previousPositions=next;renderWallEditor(board);
 }
-function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;renderCatalog();renderBoard();
+function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;el('mapSelect').value=room.backgroundMap||'classic';renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
  el('fullscreen').hidden=room.phase!=='play';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
@@ -618,9 +653,14 @@ function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id==
  if(p){el('selectedName').textContent=(CATALOG.find(t=>t.id===p.type)||{id:p.type,name:'Retired unit',icon:'✧',art:{}}).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('rotate').disabled=!editable()||p.fixed||(p.team!==team&&(room.phase!=='play'||!p.type.endsWith('wall')));el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
  el('log').replaceChildren();for(const item of room.history){const p=document.createElement('p');p.textContent=item.text;el('log').append(p);}
 }
-function resize(){if(!room)return;if(fit){const v=el('viewport');cell=Math.max(14,Math.floor((v.clientWidth-30)/32));}previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
+function resize(){if(!room)return;if(fit){
+ const v=el('viewport'),cs=getComputedStyle(v),padX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),padY=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+ const availableWidth=Math.max(1,v.clientWidth-padX),availableHeight=Math.max(1,v.clientHeight-padY);
+ cell=Math.max(1,Math.floor(Math.min(availableWidth/(WIDTH+1),availableHeight/(HEIGHT+1))));
+ v.scrollLeft=0;v.scrollTop=0;
+ }previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
 new ResizeObserver(()=>{if(room&&fit)resize();}).observe(el('viewport'));
-el('fit').onclick=()=>{fit=true;resize();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);resize();};el('flip').onclick=()=>{flipped=!flipped;previousPositions.clear();renderBoard();};
+el('fit').onclick=()=>{fit=true;resize();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);resize();};el('mapSelect').onchange=()=>act({kind:'map',map:el('mapSelect').value});el('flip').onclick=()=>{flipped=!flipped;previousPositions.clear();renderBoard();};
 el('viewport').addEventListener('wheel',e=>{
  if(!room||e.deltaY===0)return;e.preventDefault();
  const viewport=el('viewport'),board=el('board'),before=board.getBoundingClientRect(),cursorX=e.clientX-before.left,cursorY=e.clientY-before.top,oldCell=cell;
@@ -675,7 +715,7 @@ el('fullscreen').onclick=async()=>{
  try{await viewport.requestFullscreen();}catch{fullscreenView=null;toast('The browser could not enter fullscreen.');}
 };
 document.addEventListener('fullscreenchange',()=>{
- if(document.fullscreenElement===viewport){fit=false;cell=Math.max(14,Math.min((viewport.clientWidth-30)/32,(viewport.clientHeight-30)/22));resize();viewport.scrollLeft=viewport.scrollTop=0;}
+ if(document.fullscreenElement===viewport){fit=true;resize();viewport.scrollLeft=viewport.scrollTop=0;}
  else if(fullscreenView){const old=fullscreenView;fullscreenView=null;fit=old.fit;cell=old.cell;resize();viewport.scrollLeft=old.left;viewport.scrollTop=old.top;}
 });
 

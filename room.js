@@ -1,10 +1,14 @@
 import {emptyBoard,changeBoard,copy} from './model.js';
 export const other=t=>t==='red'?'blue':'red';
-export function newRoom(code,name,team,token,first){return {code,board:emptyBoard(),players:[{name,team,token}],phase:'setup',ready:{red:false,blue:false},first:first||team,turn:first||team,revision:0,undo:{red:[],blue:[]},log:[],requests:[],tickets:[]};}
-export function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup'){board.pieces=board.pieces.filter(p=>p.fixed||p.team===team);board.nextNumber=1;}return {code:r.code,board,players:r.players.map(({name,team})=>({name,team})),phase:r.phase,ready:r.ready,turn:r.turn,first:r.first,revision:r.revision,canUndo:r.undo[team].length>0,history:r.log.filter(l=>r.phase==='play'||l.team===team),myTeam:team};}
+export function newRoom(code,name,team,token,first){return {code,board:emptyBoard(),backgroundMap:'classic',players:[{name,team,token}],phase:'setup',ready:{red:false,blue:false},first:first||team,turn:first||team,revision:0,undo:{red:[],blue:[]},log:[],requests:[],tickets:[]};}
+export function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup'){board.pieces=board.pieces.filter(p=>p.fixed||p.team===team);board.nextNumber=1;}return {code:r.code,board,backgroundMap:r.backgroundMap||'classic',players:r.players.map(({name,team})=>({name,team})),phase:r.phase,ready:r.ready,turn:r.turn,first:r.first,revision:r.revision,canUndo:r.undo[team].length>0,history:r.log.filter(l=>r.phase==='play'||l.team===team),myTeam:team};}
 export function applyAction(r,team,a){
  let description='';
- if(a.kind==='reset'){
+ if(a.kind==='map'){
+  const maps=new Set(['classic','forest_midday','waterfall_ruins','frozen_boughs']);
+  if(!maps.has(a.map))throw Error('Unknown battle map.');
+  r.backgroundMap=a.map;description=`Changed battlefield to ${a.map==='classic'?'Classic':a.map==='forest_midday'?'Forest — Mid Day':a.map==='waterfall_ruins'?'Waterfall & Ruins':'Frozen Boughs'}`;
+ }else if(a.kind==='reset'){
   r.board=emptyBoard();r.phase='setup';r.ready={red:false,blue:false};r.turn=r.first;r.undo={red:[],blue:[]};r.log=[];description='Reset the table for a new setup';
  }else if(a.kind==='ready'){
   if(r.phase!=='setup')throw Error('Setup has already finished.');r.ready[team]=!r.ready[team];
@@ -20,6 +24,7 @@ export function applyAction(r,team,a){
    if(r.phase==='setup')r.board.pieces=[...r.board.pieces.filter(p=>p.fixed||p.team!==team),...last.pieces.filter(p=>!p.fixed)];else {r.board=last;r.undo[other(team)]=[];}description='Undid last edit';
   }else{
    const piece=r.board.pieces.find(p=>p.id===a.id);
+   if(a.kind==='wallHealth'&&(!piece||piece.fixed||(r.phase==='setup'&&piece.team!==team)))throw Error('You cannot adjust that wall during this phase.');
    if(['edit','remove'].includes(a.kind)&&(!piece||piece.team!==team))throw Error('Select one of your own pieces.');
    if(a.kind==='move'&&(!piece||piece.fixed))throw Error('That piece cannot be moved.');
    if(a.kind==='move'&&r.phase==='setup'&&piece.team!==team)throw Error('Only move your own pieces during setup.');
