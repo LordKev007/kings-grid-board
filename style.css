@@ -25,7 +25,7 @@
 #board{isolation:isolate}
 .map-layer{position:absolute;left:var(--cell);top:var(--cell);width:calc(var(--cell)*31);height:calc(var(--cell)*21);overflow:hidden;z-index:0;background:#0d141a;pointer-events:none;display:none}
 .map-layer.active{display:block}
-.map-layer iframe{position:absolute;left:50%;top:50%;width:121%;height:100%;transform:translate(-50%,-50%);border:0;pointer-events:none}
+.map-layer iframe{position:absolute;left:50%;top:50%;width:147%;height:122%;transform:translate(-50%,-50%);border:0;pointer-events:none}
 #board.has-map .cell{background:rgba(224,214,191,.08);border-right-color:rgba(224,231,230,.58);border-bottom-color:rgba(224,231,230,.58);text-shadow:0 1px 2px #000}
 #board.has-map .cell.alt{background:rgba(16,24,31,.07)}
 #board.has-map .cell:hover,#board.has-map .cell.alt:hover{background:rgba(239,223,169,.28)}
