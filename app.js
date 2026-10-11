@@ -6,24 +6,33 @@ const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch
 const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{toast('Browser storage unavailable. Keep your private resume link and download saves.');}};
 let room=null,session=null,local=false,localState=null,team='red',selected=null,placing=null,flipped=false,cell=30,fit=true,busy=false,connected=false,pingMode=false,rulerMode=false,rulerOrigin=null,privateRuler=null,publicRuler=null;
 let socket=null,retry=null,heartbeat=null,toastTimer=null,generation=0,dragData=null,lastDrag=0,previousPositions=new Map();
-const BATTLE_MAPS={
- classic:null,
- forest_midday:'ePDq2nNW1sc',
- waterfall_ruins:'DtsP5f_fYmk',
- frozen_boughs:'OINIK45x7SQ'
-};
+let battleMaps=[{id:'classic',name:'Classic',youtubeId:null,scale:1,offsetX:0,offsetY:0,enabled:true,sortOrder:-1}];
+const battleMap=id=>battleMaps.find(m=>m.id===id)||null;
+function populateMapSelect(){
+ const select=el('mapSelect');if(!select)return;const wanted=room?.backgroundMap||select.value||'classic';select.replaceChildren();
+ for(const map of battleMaps){const o=document.createElement('option');o.value=map.id;o.textContent=map.name;select.append(o);}
+ if(wanted&&!battleMap(wanted)){const o=document.createElement('option');o.value=wanted;o.textContent='Unavailable map';o.disabled=true;select.append(o);}
+ select.value=wanted;
+}
+async function loadBattleMaps(api){
+ try{const res=await fetch(api+'/api/backgrounds',{headers:{accept:'application/json'},cache:'no-store'});const d=await res.json();if(!res.ok)throw Error(d.error||'Could not load backgrounds.');
+  const remote=Array.isArray(d.backgrounds)?d.backgrounds.filter(m=>m&&m.enabled!==false):[];
+  battleMaps=[{id:'classic',name:'Classic',youtubeId:null,scale:1,offsetX:0,offsetY:0,enabled:true,sortOrder:-1},...remote.filter(m=>m.id!=='classic')];populateMapSelect();if(room)renderMap();
+ }catch(e){console.warn(e);populateMapSelect();}
+}
 function mapEmbedUrl(videoId){const q=new URLSearchParams({autoplay:'1',mute:'1',controls:'0',loop:'1',playlist:videoId,playsinline:'1',rel:'0',fs:'0',disablekb:'1'});return `https://www.youtube.com/embed/${videoId}?${q}`;}
 function renderMap(){
  const board=el('board'),layer=el('mapLayer');if(!board||!layer)return;
- const map=room?.backgroundMap||'classic',videoId=BATTLE_MAPS[map]||null;
+ const id=room?.backgroundMap||'classic',map=battleMap(id),videoId=map?.youtubeId||null;
  board.classList.toggle('has-map',!!videoId);layer.classList.toggle('active',!!videoId);
- const current=layer.dataset.videoId||'';
- if(!videoId){if(current){layer.replaceChildren();layer.dataset.videoId='';}return;}
- if(current===videoId)return;
- const iframe=document.createElement('iframe');iframe.src=mapEmbedUrl(videoId);iframe.title='Animated King’s Grid battlefield';iframe.allow='autoplay; encrypted-media; picture-in-picture';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.tabIndex=-1;
- layer.replaceChildren(iframe);layer.dataset.videoId=videoId;
+ if(!videoId){if(layer.childElementCount){layer.replaceChildren();layer.dataset.signature='';}return;}
+ const scale=Math.max(.5,Math.min(3,Number(map.scale)||1)),offsetX=Math.max(-100,Math.min(100,Number(map.offsetX)||0)),offsetY=Math.max(-100,Math.min(100,Number(map.offsetY)||0));
+ const signature=[videoId,scale,offsetX,offsetY].join('|');let iframe=layer.querySelector('iframe');
+ if(layer.dataset.signature!==signature||!iframe){iframe=document.createElement('iframe');iframe.src=mapEmbedUrl(videoId);iframe.title='Animated King’s Grid battlefield';iframe.allow='autoplay; encrypted-media; picture-in-picture';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.tabIndex=-1;layer.replaceChildren(iframe);layer.dataset.signature=signature;}
+ Object.assign(iframe.style,{left:`${50+offsetX}%`,top:`${50+offsetY}%`,width:`${147*scale}%`,height:`${122*scale}%`});
 }
 const start=new URL(location.href);el('api').value=start.searchParams.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev');el('name').value=read('kg-board-name','');el('code').value=start.searchParams.get('room')||'';
+el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(el('api').value)}`;loadBattleMaps(el('api').value);window.addEventListener('focus',()=>loadBattleMaps(session?.api||el('api').value));window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.kind==='kg-backgrounds-updated')loadBattleMaps(session?.api||el('api').value);});setInterval(()=>loadBattleMaps(session?.api||el('api').value),60000);
 el('update').onclick=()=>{const u=new URL(location.href);u.searchParams.set('kg_update',Date.now().toString());location.replace(u.href);};
 function toast(text){el('toast').textContent=text;el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el('toast').hidden=true,6500);}
 function server(){const u=new URL(el('api').value.trim());if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))throw Error('Enter the HTTPS URL of the new board Worker.');return u.origin;}
@@ -39,8 +48,8 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.11 Worker first.');
-  local=false;team=session.team;write(key(api,session.code),session);write('kg-board-api',api);write('kg-board-name',name);const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.13 Worker first.');
+  local=false;team=session.team;write(key(api,session.code),session);write('kg-board-last-session',session);write('kg-board-api',api);write('kg-board-name',name);await loadBattleMaps(api);el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(api)}`;const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
 el('create').onclick=()=>launch(false);el('join').onclick=()=>launch(true);
@@ -54,7 +63,7 @@ async function connect(){stopSocket();const gen=generation;status();try{const d=
  socket.onclose=()=>{connected=false;status();clearInterval(heartbeat);retry=setTimeout(connect,2000);};socket.onerror=()=>socket?.close();
  }catch{if(gen===generation){connected=false;status();retry=setTimeout(connect,3000);}}}
 el('leave').onclick=()=>{if(busy)return;stopSocket();room=null;session=null;el('table').hidden=true;el('welcome').hidden=false;el('leave').hidden=true;el('roomInfo').textContent='31 × 21 · Your board, your rules';};
-function update(r){if(room&&r.revision<room.revision)return;room=r;team=r.myTeam;if(r.phase==='setup'){privateRuler=null;publicRuler=null;rulerOrigin=null;}render();}
+function update(r){if(room&&r.revision<room.revision)return;room=r;team=r.myTeam;if(r.backgroundMap&&!battleMap(r.backgroundMap))loadBattleMaps(session?.api||el('api').value);if(r.phase==='setup'){privateRuler=null;publicRuler=null;rulerOrigin=null;}render();}
 function editable(){return room&&((room.phase==='setup'&&!room.ready[team])||room.phase==='play')&&(local||connected);}
 async function act(action){if(busy)return toast('Wait for the current edit to finish.');if(!local&&!connected)return toast('Reconnecting—editing is paused.');busy=true;
  try{if(local){applyAction(localState,team,action);write('kg-board-v2-local',localState);update(publicRoom(localState,team));}
@@ -122,7 +131,7 @@ function renderBoard(){const board=el('board'),next=new Map();for(const child of
  const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
  }previousPositions=next;renderWallEditor(board);
 }
-function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;el('mapSelect').value=room.backgroundMap||'classic';renderCatalog();renderBoard();
+function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;populateMapSelect();el('mapSelect').value=room.backgroundMap||'classic';renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
  el('fullscreen').hidden=room.phase!=='play';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';

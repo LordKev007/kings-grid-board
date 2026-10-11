@@ -32,3 +32,6 @@
 #board.has-map .axis{color:#c8d2d8;text-shadow:0 1px 2px #000}
 #board.has-map .ruler-cell{background:rgba(255,226,150,.28)}
 @media(max-width:850px){.map-control span{display:none}.map-control select{max-width:135px}}
+
+/* v0.2.13 central background library */
+.toolbar-link{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid #46535d;border-radius:7px;background:#29353f;color:#eef1f2;text-decoration:none;font-size:15px}.toolbar-link:hover{background:#3a4a56}.map-control select{min-width:132px}

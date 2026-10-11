@@ -5,9 +5,9 @@ export function publicRoom(r,team){const board=copy(r.board);if(r.phase==='setup
 export function applyAction(r,team,a){
  let description='';
  if(a.kind==='map'){
-  const maps=new Set(['classic','forest_midday','waterfall_ruins','frozen_boughs']);
-  if(!maps.has(a.map))throw Error('Unknown battle map.');
-  r.backgroundMap=a.map;description=`Changed battlefield to ${a.map==='classic'?'Classic':a.map==='forest_midday'?'Forest — Mid Day':a.map==='waterfall_ruins'?'Waterfall & Ruins':'Frozen Boughs'}`;
+  const map=String(a.map||'classic').trim();
+  if(map!=='classic'&&!/^[a-z0-9_-]{1,60}$/i.test(map))throw Error('Invalid battle map.');
+  r.backgroundMap=map;description=map==='classic'?'Changed battlefield to Classic':'Changed battlefield';
  }else if(a.kind==='reset'){
   r.board=emptyBoard();r.phase='setup';r.ready={red:false,blue:false};r.turn=r.first;r.undo={red:[],blue:[]};r.log=[];description='Reset the table for a new setup';
  }else if(a.kind==='ready'){
