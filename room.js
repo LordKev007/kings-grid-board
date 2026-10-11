@@ -35,6 +35,8 @@ export function applyAction(r,team,a){
     if(r.board.pieces.some(p=>p.team===team&&p.type===a.type&&p.copyNo===a.copyNo))throw Error('That numbered piece is already placed. Select it to move it.');
    }
    if(a.kind==='import'&&r.phase==='setup')throw Error('Load saved games after both players are ready.');
+   if(a.kind==='paint')a={...a,team};
+   if(a.kind==='clearPaint')a={...a,team};
    const before=copy(r.board);
    let result;
    if(a.kind==='clear'){const b=copy(r.board);b.pieces=b.pieces.filter(p=>p.fixed||p.team!==team);result={board:b,description:'Returned all own pieces to the tray'};}
