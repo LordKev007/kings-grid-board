@@ -157,3 +157,11 @@
 #board[data-tool=paint],#board[data-tool=erase]{touch-action:none}
 #board[data-tool=paint] .cell,#board[data-tool=erase] .cell,#board[data-tool=ruler] .cell,#board[data-tool=ping] .cell{cursor:crosshair}
 @media(max-width:600px){.kg-rail{width:40px}.kg-popover{right:46px;width:206px}}
+
+/* v0.2.23 Table menu sits on one line at the same height as Undo and the map selector */
+.compact-toolbar>button,.compact-toolbar .toolbar-menu>summary,.compact-map select{height:32px;min-height:32px}
+.toolbar-menu>summary{display:inline-flex;align-items:center;gap:5px;font-size:12px}
+.toolbar-menu>summary:after{margin-left:0}
+/* Distracted: the unit is shown upside down with a large music note over its centre */
+.piece.distracted .token-art,.piece.distracted .placeholder{transform:scaleY(-1)}
+.piece.distracted .statusMark{inset:0;display:grid;place-items:center;font-size:calc(var(--cell)*.62);line-height:1;color:#ffe27a;text-shadow:0 0 3px #000,0 1px 2px #000;pointer-events:none}
