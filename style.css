@@ -59,8 +59,6 @@
 }
 .compact-map{margin:0;display:block}
 .compact-map select{min-width:118px;max-width:160px;height:32px;padding:5px 27px 5px 8px;border-radius:6px}
-.pinned-tools{display:flex;align-items:center;gap:5px}
-.pinned-action{font-size:12px}
 .toolbar-menu{position:relative}
 .toolbar-menu>summary{
   list-style:none;
@@ -110,51 +108,15 @@
 }
 .menu-link:hover{background:#3a4a56}
 .menu-file{display:block}
-.menu-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:center}
-.menu-row>button:first-child{min-width:0}
-.menu-row .pin-toggle{
-  width:34px;
-  min-width:34px;
-  padding:0;
-  display:grid;
-  place-items:center;
-  text-align:center;
-}
-.pin-toggle.pinned{border-color:var(--gold);color:var(--gold)}
-.zoom-row{grid-template-columns:38px minmax(62px,1fr) 38px}
-.zoom-row output{display:grid;place-items:center;color:#b9c3ca;font-size:11px}
-.tool-context{
-  min-height:42px;
-  padding:6px 14px;
-  border-bottom:1px solid var(--line);
-  background:#1d2932;
-  display:flex;
-  align-items:center;
-  gap:9px;
-  position:relative;
-  z-index:45;
-}
-.tool-context>strong{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);white-space:nowrap}
-#toolContextBody{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.tool-context button,.tool-context input,.tool-context select{min-height:30px;padding:5px 8px;font-size:11px}
-.context-close{margin-left:auto;width:30px!important;padding:0!important;font-size:18px!important}
-.tool-context .ruler-controls,.tool-context .paint-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.tool-context label{display:flex;align-items:center;gap:4px;font-size:11px}
-.tool-context input[type=number]{width:58px}
-.tool-context input[type=color]{width:34px;height:30px;padding:2px}
-.tool-context select{width:auto;min-width:92px}
 
 /* The toolbar now owns less vertical space; preserve the board area. */
 .workspace{height:calc(100vh - 136px)}
-.tool-context:not([hidden]) + .workspace{height:calc(100vh - 178px)}
 
 @media(max-width:900px){
   .compact-toolbar{overflow-x:auto;overflow-y:visible;scrollbar-width:thin}
   .compact-toolbar .spacer{min-width:4px}
   .compact-map select{min-width:108px;max-width:130px}
   .menu-panel{position:fixed;right:10px;top:136px}
-  .tool-context{overflow-x:auto;flex-wrap:nowrap}
-  #toolContextBody{flex-wrap:nowrap}
 }
 @media(max-width:600px){
   .compact-toolbar{padding:6px 8px;gap:4px}
@@ -163,40 +125,35 @@
   .compact-map select{min-width:100px;max-width:112px}
   .setup-actions #turnLabel{display:none}
   .workspace{height:auto}
-  .tool-context:not([hidden]) + .workspace{height:auto}
 }
 
-/* v0.2.21 stable VTT-style layout */
-#table{min-height:calc(100vh - 90px)}
-.kg-topbar{min-height:56px;padding:9px 16px;flex-wrap:nowrap;background:#141c23}
-.kg-topbar .compact-map select{min-width:170px;max-width:210px}
-.kg-workspace{display:grid;grid-template-columns:240px minmax(0,1fr) 54px;height:calc(100vh - 146px)}
-.kg-workspace>.boardsection{min-width:0;min-height:0;padding:0 12px 10px}
-.kg-workspace>#hint{min-height:0}
-.kg-rail{background:#17212a;border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 6px;z-index:25}
-.kg-tool{width:40px;height:40px;min-width:40px;padding:0;border-radius:8px;display:grid;place-items:center;font-size:17px;background:#22303a}
-.kg-tool span{line-height:1;pointer-events:none}
-.kg-tool.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:#2c3942}
-.kg-rail-sep{width:28px;border-top:1px solid #3a4853;margin:2px 0}
-.kg-popover{position:fixed;right:62px;top:170px;width:245px;padding:10px;background:#202c35;border:1px solid #52616c;border-radius:10px;box-shadow:0 16px 48px #0008;z-index:100}
-.kg-pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+/* v0.2.22 board stage: board in the middle, compact tool rail on the right, tool popovers float over the board */
+.stage{position:relative;display:flex;min-width:0;min-height:0}
+.stage>.boardsection{flex:1;min-width:0}
+.stage:fullscreen{width:100vw;height:100vh;background:#141c23}
+.kg-rail{flex:none;width:44px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;border-left:1px solid var(--line);background:#17212a}
+.kg-tool{width:32px;height:32px;padding:0;display:grid;place-items:center;border-radius:6px;background:#22303a;color:#c9d3da}
+.kg-tool svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.kg-tool svg .fill{fill:currentColor;stroke:none}
+.kg-tool.active{border-color:var(--gold);color:var(--gold);background:#2c3942;box-shadow:inset 0 0 0 1px var(--gold)}
+.kg-rail-sep{width:22px;border-top:1px solid #3a4853;margin:3px 0}
+.kg-popover{position:absolute;right:50px;top:8px;width:224px;padding:10px;display:grid;gap:9px;background:#202c35;border:1px solid #52616c;border-radius:9px;box-shadow:0 14px 40px #0009;z-index:40}
+.kg-pop-head{display:flex;align-items:center;justify-content:space-between}
 .kg-pop-head strong{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--gold)}
-.kg-pop-head button{width:28px;height:28px;padding:0;font-size:17px}
-#toolContextBody{display:grid;gap:9px}
-#toolContextBody .ruler-controls,#toolContextBody .paint-controls{display:grid;gap:9px}
-#toolContextBody label{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:8px;font-size:11px}
-#toolContextBody input[type=number],#toolContextBody select{width:100%}
-#toolContextBody input[type=color]{width:42px;height:30px;padding:2px}
-#toolContextBody input[type=range]{width:100%}
-.kg-paint-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.kg-paint-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.kg-popover button{font-size:11px;padding:7px 9px}
-.kg-more-popover{top:auto;bottom:18px}
-.kg-more-grid{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:6px;margin-bottom:8px}
-.kg-more-grid output{text-align:center;color:#c7d1d8;font-size:11px}
-#viewport{touch-action:none}
-#legacyControls{display:none!important}
-.tool-context{display:none!important}
-@media(max-width:900px){.kg-workspace{grid-template-columns:190px minmax(0,1fr) 50px}.kg-topbar .compact-map select{min-width:125px;max-width:150px}}
-@media(max-width:650px){.kg-workspace{grid-template-columns:145px minmax(0,1fr) 46px}.kg-tool{width:36px;height:36px;min-width:36px}.kg-popover{right:52px;width:220px}.kg-topbar{overflow-x:auto}.boardfooter span:last-child{display:none}}
-.opacity-control{display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:7px}.opacity-control output{text-align:right;color:#c7d1d8;font-size:11px}
+.kg-pop-head button{width:26px;height:26px;padding:0;font-size:16px;line-height:1}
+.kg-popover label{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:8px;font-size:11px}
+.kg-popover input,.kg-popover select{padding:6px;font-size:12px}
+.kg-popover input[type=color]{width:44px;height:28px;padding:2px}
+.kg-popover button{padding:6px 8px;font-size:12px}
+.kg-slider{display:grid;grid-template-columns:minmax(0,1fr) 38px;align-items:center;gap:6px}
+.kg-slider input{padding:0;accent-color:var(--gold)}
+.kg-slider output{text-align:right;color:#d5dde2;font-size:11px;font-variant-numeric:tabular-nums}
+.kg-seg,.kg-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kg-zoom{display:grid;grid-template-columns:36px 1fr 36px;align-items:center;gap:6px}
+.kg-zoom output{text-align:center;color:#d5dde2;font-size:12px}
+.kg-wide{width:100%}
+/* In Paint/Erase, strokes pass through pieces and touch input paints instead of scrolling. */
+#board[data-tool=paint] .piece,#board[data-tool=erase] .piece{pointer-events:none}
+#board[data-tool=paint],#board[data-tool=erase]{touch-action:none}
+#board[data-tool=paint] .cell,#board[data-tool=erase] .cell,#board[data-tool=ruler] .cell,#board[data-tool=ping] .cell{cursor:crosshair}
+@media(max-width:600px){.kg-rail{width:40px}.kg-popover{right:46px;width:206px}}

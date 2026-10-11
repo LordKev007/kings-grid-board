@@ -54,6 +54,17 @@ export function changeBoard(original,action){
  }
  case 'move': {const p=find();p.x=action.x;p.y=action.y;description=`Moved ${p.label}${p.x===null?' to reserve':` to ${coord(p.x,p.y)}`}`;break;}
  case 'paint': {if(!Number.isInteger(action.x)||!Number.isInteger(action.y)||action.x<0||action.x>=WIDTH||action.y<0||action.y>=HEIGHT||!/^#[0-9a-f]{6}$/i.test(action.color)||typeof action.opacity!=='number'||action.opacity<0||action.opacity>1||!['red','blue'].includes(action.team))throw Error('Invalid paint.');b.paint[`${action.x},${action.y}`]={color:action.color.toLowerCase(),opacity:action.opacity,team:action.team};description=`Painted ${coord(action.x,action.y)}`;break;}
+ case 'paintStroke': {
+  // One held-mouse stroke: every tile touched, committed as a single edit (one revision, one undo step).
+  const tiles=action.tiles,erase=action.erase===true;
+  if(!Array.isArray(tiles)||!tiles.length||tiles.length>WIDTH*HEIGHT)throw Error('Invalid paint stroke.');
+  if(!erase&&(!/^#[0-9a-f]{6}$/i.test(action.color)||typeof action.opacity!=='number'||action.opacity<0||action.opacity>1||!['red','blue'].includes(action.team)))throw Error('Invalid paint.');
+  const keys=new Set();
+  for(const t of tiles){if(!Array.isArray(t)||t.length!==2||!Number.isInteger(t[0])||!Number.isInteger(t[1])||t[0]<0||t[0]>=WIDTH||t[1]<0||t[1]>=HEIGHT)throw Error('Invalid paint tile.');keys.add(`${t[0]},${t[1]}`);}
+  let changed=0;
+  for(const k of keys){if(erase){if(b.paint[k]){delete b.paint[k];changed++;}}else{b.paint[k]={color:action.color.toLowerCase(),opacity:action.opacity,team:action.team};changed++;}}
+  description=`${erase?'Erased':'Painted'} ${changed} tile${changed===1?'':'s'}`;break;
+ }
  case 'erasePaint': {if(!Number.isInteger(action.x)||!Number.isInteger(action.y))throw Error('Invalid paint tile.');delete b.paint[`${action.x},${action.y}`];description=`Erased paint at ${coord(action.x,action.y)}`;break;}
  case 'clearPaint': {if(action.scope==='all'){b.paint={};description='Cleared all painted tiles';}else{for(const [k,v] of Object.entries(b.paint))if(v.team===action.team)delete b.paint[k];description='Cleared own painted tiles';}break;}
  case 'wallHealth': {const p=find(),max=wallMaxHP(p.type);if(max===null)throw Error('Only wood and stone walls have adjustable health.');if(!Number.isInteger(action.hp)||action.hp<0||action.hp>max)throw Error(`Health must be between 0 and ${max}.`);p.hp=action.hp;description=`${p.label}: ${p.hp}/${max} HP`;break;}
