@@ -43,7 +43,7 @@ export function validateBoard(b){
  return b;
 }
 export function changeBoard(original,action){
- const b=copy(original);let description='Board updated';
+ const b=copy(original);if(b.paint===undefined)b.paint={};let description='Board updated';
  const find=()=>{const p=b.pieces.find(p=>p.id===action.id);if(!p)throw Error('Piece no longer exists.');if(p.fixed)throw Error('The fixed board markers cannot be moved.');return p;};
  switch(action.kind){
  case 'add': {
