@@ -3,6 +3,14 @@ const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch
 const params=new URL(location.href).searchParams;
 const api=(params.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev')).replace(/\/$/,'');
 let maps=[],currentId=null,session=findSession(api),drag=null;
+const roomCode=(params.get('room')||session?.code||'').trim().toUpperCase();
+{
+ const back=new URL('./',location.href);
+ back.searchParams.set('server',api);
+ if(roomCode)back.searchParams.set('room',roomCode);
+ el('backToBoard').href=back.href;
+}
+
 function findSession(server){
  const last=read('kg-board-last-session');if(last?.token&&last?.code&&last?.api===server)return last;
  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k?.startsWith('kg-board-v2:'))continue;const s=read(k);if(s?.token&&s?.code&&s?.api===server)return s;}

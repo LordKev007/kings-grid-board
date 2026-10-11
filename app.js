@@ -32,7 +32,7 @@ function renderMap(){
  Object.assign(iframe.style,{left:`${50+offsetX}%`,top:`${50+offsetY}%`,width:`${147*scale}%`,height:`${122*scale}%`});
 }
 const start=new URL(location.href);el('api').value=start.searchParams.get('server')||read('kg-board-api','https://kings-grid-board-v2.battlesim.workers.dev');el('name').value=read('kg-board-name','');el('code').value=start.searchParams.get('room')||'';
-el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(el('api').value)}`;loadBattleMaps(el('api').value);window.addEventListener('focus',()=>loadBattleMaps(session?.api||el('api').value));window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.kind==='kg-backgrounds-updated')loadBattleMaps(session?.api||el('api').value);});setInterval(()=>loadBattleMaps(session?.api||el('api').value),60000);
+el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(el('api').value)}${start.searchParams.get('room')?`&room=${encodeURIComponent(start.searchParams.get('room'))}`:''}`;loadBattleMaps(el('api').value);window.addEventListener('focus',()=>loadBattleMaps(session?.api||el('api').value));window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.kind==='kg-backgrounds-updated')loadBattleMaps(session?.api||el('api').value);});setInterval(()=>loadBattleMaps(session?.api||el('api').value),60000);
 el('update').onclick=()=>{const u=new URL(location.href);u.searchParams.set('kg_update',Date.now().toString());location.replace(u.href);};
 function toast(text){el('toast').textContent=text;el('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el('toast').hidden=true,6500);}
 function server(){const u=new URL(el('api').value.trim());if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))throw Error('Enter the HTTPS URL of the new board Worker.');return u.origin;}
@@ -48,8 +48,8 @@ async function launch(join){
    if(privateToken||saved?.token){session={api,code,token:privateToken||saved.token};d=await request(`/api/rooms/${code}/state`);session.team=d.room.myTeam;}
    else{d=await request(`/api/rooms/${code}/join`,{api,token:null,body:{name}});session={api,code,token:d.token,team:d.team};}
   }else{const chosen=$('input[name="team"]:checked')?.value;if(!chosen)throw Error('Choose Red or Blue.');d=await request('/api/rooms',{api,token:null,body:{name,team:chosen,first:chosen}});session={api,code:d.room.code,token:d.token,team:d.team};}
-  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.13 Worker first.');
-  local=false;team=session.team;write(key(api,session.code),session);write('kg-board-last-session',session);write('kg-board-api',api);write('kg-board-name',name);await loadBattleMaps(api);el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(api)}`;const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
+  if(!d.room.phase)throw Error('This is an older board server. Deploy the v0.2.14 Worker first.');
+  local=false;team=session.team;write(key(api,session.code),session);write('kg-board-last-session',session);write('kg-board-api',api);write('kg-board-name',name);await loadBattleMaps(api);el('backgroundEditor').href=`background-editor.html?server=${encodeURIComponent(api)}&room=${encodeURIComponent(session.code)}`;const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('room',session.code);history.replaceState(null,'',u);enter(d.room);connect();
  }catch(e){el('setupError').textContent=e.message;}finally{el('create').disabled=el('join').disabled=false;}
 }
 el('create').onclick=()=>launch(false);el('join').onclick=()=>launch(true);
@@ -207,3 +207,15 @@ document.addEventListener('fullscreenchange',()=>{
  if(document.fullscreenElement===viewport){fit=true;resize();viewport.scrollLeft=viewport.scrollTop=0;}
  else if(fullscreenView){const old=fullscreenView;fullscreenView=null;fit=old.fit;cell=old.cell;resize();viewport.scrollLeft=old.left;viewport.scrollTop=old.top;}
 });
+
+// If this browser already owns a seat for a room URL, resume it automatically.
+// This makes links back from the Background Editor return to the live table,
+// while public invite links without a saved/private token still stop at Join.
+(async()=>{
+ const initialCode=(start.searchParams.get('room')||'').trim().toUpperCase();
+ if(!/^[A-Z2-9]{8}$/.test(initialCode))return;
+ try{
+  const api=server(),saved=read(key(api,initialCode)),hash=new URLSearchParams(location.hash.slice(1));
+  if(hash.get('resume')||saved?.token)await launch(true);
+ }catch(e){console.warn('Automatic room resume failed:',e);}
+})();
