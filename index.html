@@ -37,10 +37,138 @@
 .toolbar-link{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid #46535d;border-radius:7px;background:#29353f;color:#eef1f2;text-decoration:none;font-size:15px}.toolbar-link:hover{background:#3a4a56}.map-control select{min-width:132px}
 
 .paint-controls{display:flex;align-items:center;gap:7px}.paint-controls label{display:flex;align-items:center;gap:4px;color:#b9c3ca;font-size:11px}.paint-controls input[type=color],.ruler-controls input[type=color]{width:34px;height:30px;padding:2px;min-width:34px}.paint-controls select{width:104px;padding:6px;font-size:11px}.paint-cell{position:absolute;z-index:1;pointer-events:none;box-shadow:inset 0 0 0 1px #ffffff24}.ruler-cell{z-index:2}.piece{z-index:3}.piece.distracted .statusMark{color:#ffe27a;font-size:15px;text-shadow:0 1px 2px #000}.piece.distracted{box-shadow:0 0 0 2px #ffe27a99,0 2px 3px #0005}
+
+/* v0.2.19 compact, personalisable in-game toolbar */
+.compact-toolbar{
+  min-height:46px;
+  padding:7px 14px;
+  gap:6px;
+  flex-wrap:nowrap;
+  position:relative;
+  z-index:60;
+  background:#18232b;
+}
+.compact-toolbar #connection{white-space:nowrap;margin-right:4px}
+.setup-actions{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.setup-actions button{padding:6px 9px}
+.compact-toolbar>button,.compact-toolbar summary,.pinned-action{
+  min-height:32px;
+  padding:6px 9px;
+  border-radius:6px;
+  white-space:nowrap;
+}
+.compact-map{margin:0;display:block}
+.compact-map select{min-width:118px;max-width:160px;height:32px;padding:5px 27px 5px 8px;border-radius:6px}
+.pinned-tools{display:flex;align-items:center;gap:5px}
+.pinned-action{font-size:12px}
+.toolbar-menu{position:relative}
+.toolbar-menu>summary{
+  list-style:none;
+  display:grid;
+  place-items:center;
+  border:1px solid #46535d;
+  background:#29353f;
+  color:#eef1f2;
+  cursor:pointer;
+  user-select:none;
+}
+.toolbar-menu>summary::-webkit-details-marker{display:none}
+.toolbar-menu>summary:after{content:'▾';font-size:9px;margin-left:5px;color:#9fb0bb}
+.toolbar-menu[open]>summary,.toolbar-menu>summary:hover{background:#3a4a56}
+.menu-panel{
+  position:absolute;
+  right:0;
+  top:calc(100% + 7px);
+  width:max-content;
+  min-width:178px;
+  max-width:min(320px,calc(100vw - 24px));
+  padding:7px;
+  border:1px solid #46535d;
+  border-radius:8px;
+  background:#202c35;
+  box-shadow:0 12px 34px #0009;
+  display:grid;
+  gap:5px;
+  z-index:100;
+}
+.menu-panel button,.menu-panel .filebutton,.menu-panel .menu-link{
+  width:100%;
+  min-height:32px;
+  margin:0;
+  padding:7px 9px;
+  text-align:left;
+  font-size:12px;
+  border-radius:6px;
+}
+.menu-link{
+  display:block;
+  border:1px solid #46535d;
+  background:#29353f;
+  color:#eef1f2;
+  text-decoration:none;
+  cursor:pointer;
+}
+.menu-link:hover{background:#3a4a56}
+.menu-file{display:block}
+.menu-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:center}
+.menu-row>button:first-child{min-width:0}
+.menu-row .pin-toggle{
+  width:34px;
+  min-width:34px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+.pin-toggle.pinned{border-color:var(--gold);color:var(--gold)}
+.zoom-row{grid-template-columns:38px minmax(62px,1fr) 38px}
+.zoom-row output{display:grid;place-items:center;color:#b9c3ca;font-size:11px}
+.tool-context{
+  min-height:42px;
+  padding:6px 14px;
+  border-bottom:1px solid var(--line);
+  background:#1d2932;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  position:relative;
+  z-index:45;
+}
+.tool-context>strong{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+#toolContextBody{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool-context button,.tool-context input,.tool-context select{min-height:30px;padding:5px 8px;font-size:11px}
+.context-close{margin-left:auto;width:30px!important;padding:0!important;font-size:18px!important}
+.tool-context .ruler-controls,.tool-context .paint-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool-context label{display:flex;align-items:center;gap:4px;font-size:11px}
+.tool-context input[type=number]{width:58px}
+.tool-context input[type=color]{width:34px;height:30px;padding:2px}
+.tool-context select{width:auto;min-width:92px}
+
+/* The toolbar now owns less vertical space; preserve the board area. */
+.workspace{height:calc(100vh - 136px)}
+.tool-context:not([hidden]) + .workspace{height:calc(100vh - 178px)}
+
+@media(max-width:900px){
+  .compact-toolbar{overflow-x:auto;overflow-y:visible;scrollbar-width:thin}
+  .compact-toolbar .spacer{min-width:4px}
+  .compact-map select{min-width:108px;max-width:130px}
+  .menu-panel{position:fixed;right:10px;top:136px}
+  .tool-context{overflow-x:auto;flex-wrap:nowrap}
+  #toolContextBody{flex-wrap:nowrap}
+}
+@media(max-width:600px){
+  .compact-toolbar{padding:6px 8px;gap:4px}
+  .compact-toolbar #connection{font-size:11px}
+  .compact-toolbar>button,.compact-toolbar summary,.pinned-action{padding:5px 7px}
+  .compact-map select{min-width:100px;max-width:112px}
+  .setup-actions #turnLabel{display:none}
+  .workspace{height:auto}
+  .tool-context:not([hidden]) + .workspace{height:auto}
+}
 </style></head><body>
-<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.18</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div><button id="update" title="Reload the latest version of the board">Update</button><button id="leave" hidden>Leave table</button></header>
+<header><div class="brand"><span class="crown">♛</span><div><h1>King’s Grid</h1><span class="eyebrow">THE SHARED TABLE <small>v0.2.19</small></span></div></div><div id="roomInfo">31 × 21 · Your board, your rules</div></header>
 <main id="welcome"><section class="intro"><div class="eyebrow">PULL UP A CHAIR</div><h2>Same board.<br>Different places.</h2><p>Move the pieces here. Keep your units on your iPads.<br>Bring your own voice call and settle in for a game.</p><div class="mini-grid"><span>♛</span><span>♞</span><span>⚔</span></div><button id="local" class="secondary">Try the board on this computer</button><p class="muted">Local practice is saved only in this browser.</p></section><section class="joincard"><h3>Your table</h3><label>Board server URL<input id="api" type="url" placeholder="https://kings-grid-board.…workers.dev" autocomplete="url"></label><p class="muted">Use the new board Worker’s URL from Cloudflare.</p><label>Your name<input id="name" maxlength="30" placeholder="Kevin or Bubs" autocomplete="given-name"></label><div class="choose"><label><input type="radio" name="team" value="red"> <b class="redtext">Red</b></label><label><input type="radio" name="team" value="blue"> <b class="bluetext">Blue</b></label></div><button id="create" class="primary">Create a table</button><div class="divider">OR JOIN A TABLE</div><label>Room code<input id="code" maxlength="8" placeholder="8-character code" autocapitalize="characters"></label><button id="join">Join / resume table</button><p id="setupError" role="alert"></p></section></main>
-<main id="table" hidden><nav class="toolbar"><span id="connection" role="status">Local practice</span><button id="invite">Copy invite</button><button id="resume">Private resume link</button><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button><button id="ping">◎ Ping</button><button id="localSwitch" hidden>Switch local player</button><span id="turnLabel"></span><span class="spacer"></span><button id="undo">↶ Undo last edit</button><button id="fit">Fit board</button><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button><label class="map-control" title="Choose a shared animated battlefield"><span>Map</span><select id="mapSelect" aria-label="Battle map"><option value="classic">Classic</option></select></label><a id="backgroundEditor" class="toolbar-link" href="background-editor.html" target="_blank" rel="noopener" title="Open the battlefield background editor">⚙</a><button id="flip">Flip view</button><button id="fullscreen" hidden>Board fullscreen</button></nav><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div><details class="tools"><summary>Save & table tools</summary><button id="export">Download board save</button><label class="filebutton">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button></details></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"><div id="mapLayer" class="map-layer" aria-hidden="true"></div></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option><option value="distracted">Distracted ♪</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
+<main id="table" hidden><nav class="toolbar compact-toolbar"><span id="connection" role="status">Local practice</span><span id="setupActions" class="setup-actions"><span id="turnLabel"></span><button id="ready" class="primary">Ready</button><button id="pass" class="primary" hidden>Pass Turn</button></span><span class="spacer"></span><button id="undo" title="Undo last board edit">↶ Undo</button><label class="map-control compact-map" title="Choose a shared animated battlefield"><select id="mapSelect" aria-label="Battle map"><option value="classic">Classic</option></select></label><span id="pinnedTools" class="pinned-tools" aria-label="Pinned board tools"></span><details id="toolsMenu" class="toolbar-menu"><summary>Tools</summary><div class="menu-panel"><div class="menu-row"><button id="ping">◎ Ping</button><button class="pin-toggle" data-pin="ping" title="Pin Ping to this browser’s toolbar" aria-label="Pin Ping">📌</button></div><div id="rulerMenuSlot" class="menu-row"></div><div id="paintMenuSlot" class="menu-row"></div></div></details><details id="viewMenu" class="toolbar-menu"><summary>View</summary><div class="menu-panel"><div class="menu-row"><button id="fit">Fit board</button><button class="pin-toggle" data-pin="fit" title="Pin Fit board to this browser’s toolbar" aria-label="Pin Fit board">📌</button></div><div class="menu-row zoom-row"><button id="minus" aria-label="Zoom out">−</button><output id="zoomLabel">100%</output><button id="plus" aria-label="Zoom in">+</button></div><div class="menu-row"><button id="flip">Flip view</button><button class="pin-toggle" data-pin="flip" title="Pin Flip view to this browser’s toolbar" aria-label="Pin Flip view">📌</button></div><button id="fullscreen" hidden>Board fullscreen</button></div></details><details id="tableMenu" class="toolbar-menu"><summary>Table</summary><div class="menu-panel"><button id="invite">Copy invite</button><button id="resume">Private resume link</button><a id="backgroundEditor" class="menu-link" href="background-editor.html" target="_blank" rel="noopener">Edit backgrounds…</a><button id="export">Download board save</button><label class="filebutton menu-file">Load board save<input id="import" type="file" accept=".json,application/json" hidden></label><button id="localSwitch" hidden>Switch local player</button><button id="clear" class="danger">Return my pieces to tray</button><button id="reset" class="danger">Reset table for new setup</button><button id="update" title="Reload the latest version of the board">Update board</button><button id="leave" class="danger" hidden>Leave table</button></div></details></nav><div id="toolContext" class="tool-context" hidden><strong id="toolContextLabel"></strong><span id="toolContextBody"></span><button id="closeToolContext" class="context-close" title="Close active tool">×</button></div><div class="workspace"><aside><div class="tabbar"><button id="trayTab" class="active">Piece tray</button><button id="logTab">Activity</button></div><div id="tray"><p class="muted">Drag a numbered piece onto the board. Click placement also works.</p><div id="ownTeam" class="teamchoices"></div><input id="search" placeholder="Find a piece…" aria-label="Find a piece"><div id="catalog"></div><label class="orientation">Wall direction<select id="wallDirection"><option value="horizontal">Horizontal · 5 across</option><option value="vertical">Vertical · 5 down</option></select></label><button id="addReserve">Add chosen piece to reserve</button><h4>Reserve <span id="reserveCount"></span></h4><div id="reserves"></div></div><div id="log" hidden></div></aside><section class="boardsection"><div id="hint" role="status">Choose a piece from the tray to begin.</div><div id="viewport"><div id="board" role="grid" aria-label="King’s Grid 31 columns by 21 rows"><div id="mapLayer" class="map-layer" aria-hidden="true"></div></div></div><div class="boardfooter"><span id="counts">0 pieces</span><span>Drag to move · click for controls · Shift-click to ping · Middle-drag to pan · Esc exits fullscreen</span></div><div id="selection" hidden><div><strong id="selectedName"></strong><span id="selectedCoord"></span></div><div class="editrow"><label>Label<input id="label" maxlength="40"></label><label>Status<select id="pieceStatus"><option value="normal">Normal</option><option value="defeated">Defeated</option><option value="captured">Captured</option><option value="distracted">Distracted ♪</option></select></label><button id="savePiece">Apply</button><button id="rotate">Rotate</button><button id="reservePiece">To reserve</button><button id="remove" class="danger">Remove</button><button id="cancel">Deselect</button></div><div id="stack"></div></div></section></div></main><div id="toast" role="alert" hidden></div><script type="module">
 const CATALOG = [
   {
     "id": "unit1",
@@ -611,14 +739,38 @@ async function act(action){if(busy)return toast('Wait for the current edit to fi
 el('localSwitch').onclick=()=>{team=other(team);selected=null;placing=null;previousPositions.clear();update(publicRoom(localState,team));toast(`Now viewing as ${team}. This is a local two-seat test.`);};
 el('ready').onclick=()=>{selected=null;placing=null;act({kind:'ready'});};
 function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
-const rulerButton=button('◎ Ruler',()=>{rulerMode=!rulerMode;paintMode=false;rulerButton.classList.toggle('active',rulerMode);paintButton?.classList.remove('active');erasePaintButton?.classList.remove('active');if(rulerMode)toast('Ruler mode: click any board tile, then enter a radius.');else{rulerOrigin=null;privateRuler=null;publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));render();}},'');
+const closeToolbarMenus=()=>document.querySelectorAll('.toolbar-menu[open]').forEach(d=>d.removeAttribute('open'));
+const toolbarPinsKey='kg-toolbar-pins';
+let toolbarPins=new Set(read(toolbarPinsKey,[]));
+const allowedPins=new Set(['ping','ruler','paint','fit','flip']);toolbarPins=new Set([...toolbarPins].filter(x=>allowedPins.has(x)));
+let rulerButton,paintButton,erasePaintButton;
+function showToolContext(kind){
+ const box=el('toolContext'),body=el('toolContextBody');body.replaceChildren();
+ if(kind==='ruler'&&rulerMode){el('toolContextLabel').textContent='Ruler';body.append(rulerControls);box.hidden=false;}
+ else if(kind==='paint'&&paintMode){el('toolContextLabel').textContent=paintErase?'Erase paint':'Paint';body.append(paintControls,erasePaintButton,clearMine,clearAll);box.hidden=false;}
+ else box.hidden=true;
+}
+function togglePin(id){if(toolbarPins.has(id))toolbarPins.delete(id);else toolbarPins.add(id);write(toolbarPinsKey,[...toolbarPins]);renderPinnedToolbar();}
+function sourceForPin(id){return {ping:el('ping'),ruler:rulerButton,paint:paintButton,fit:el('fit'),flip:el('flip')}[id]||null;}
+function pinLabel(id){return {ping:'◎ Ping',ruler:'◎ Ruler',paint:'▦ Paint',fit:'Fit',flip:'Flip'}[id]||id;}
+function renderPinnedToolbar(){
+ document.querySelectorAll('.pin-toggle').forEach(b=>{const on=toolbarPins.has(b.dataset.pin);b.classList.toggle('pinned',on);b.textContent=on?'📍':'📌';b.title=on?'Unpin from this browser’s toolbar':'Pin to this browser’s toolbar';});
+ const host=el('pinnedTools');host.replaceChildren();
+ for(const id of ['ping','ruler','paint','fit','flip'])if(toolbarPins.has(id)){const src=sourceForPin(id),b=button(pinLabel(id),()=>{src?.click();renderPinnedToolbar();closeToolbarMenus();},'pinned-action');b.dataset.tool=id;b.classList.toggle('active',!!src?.classList.contains('active'));host.append(b);}
+}
+rulerButton=button('◎ Ruler',()=>{rulerMode=!rulerMode;paintMode=false;rulerButton.classList.toggle('active',rulerMode);paintButton?.classList.remove('active');erasePaintButton?.classList.remove('active');if(rulerMode)toast('Ruler mode: click any board tile, then enter a radius.');else{rulerOrigin=null;privateRuler=null;publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));render();}showToolContext(rulerMode?'ruler':null);renderPinnedToolbar();closeToolbarMenus();},'');
 const rulerControls=document.createElement('span');rulerControls.className='ruler-controls';rulerControls.innerHTML='<label>Radius <input id="rulerRadius" type="number" min="1" max="30" value="5"></label><label>Colour <input id="rulerColor" type="color" value="#f1c75b" aria-label="Ruler colour"></label><label>Show to <select id="rulerScope"><option value="private">Only me</option><option value="public">Both players</option></select></label>';
-const paintButton=button('▦ Paint',()=>{paintMode=!paintMode;paintErase=false;rulerMode=false;paintButton.classList.toggle('active',paintMode);erasePaintButton.classList.remove('active');rulerButton.classList.remove('active');if(paintMode)toast('Paint mode: click any tile. Paint stays until erased.');},'');
-const erasePaintButton=button('⌫ Erase',()=>{paintMode=!paintMode||!paintErase;paintErase=true;rulerMode=false;erasePaintButton.classList.toggle('active',paintMode);paintButton.classList.remove('active');rulerButton.classList.remove('active');if(paintMode)toast('Erase mode: click painted tiles to clear them.');},'');
+paintButton=button('▦ Paint',()=>{paintMode=!paintMode;paintErase=false;rulerMode=false;paintButton.classList.toggle('active',paintMode);erasePaintButton.classList.remove('active');rulerButton.classList.remove('active');if(paintMode)toast('Paint mode: click any tile. Paint stays until erased.');showToolContext(paintMode?'paint':null);renderPinnedToolbar();closeToolbarMenus();},'');
+erasePaintButton=button('⌫ Erase',()=>{paintMode=true;paintErase=!paintErase;rulerMode=false;erasePaintButton.classList.toggle('active',paintErase);paintButton.classList.toggle('active',paintMode&&!paintErase);rulerButton.classList.remove('active');showToolContext('paint');renderPinnedToolbar();if(paintErase)toast('Erase mode: click painted tiles to clear them.');},'');
 const paintControls=document.createElement('span');paintControls.className='paint-controls';paintControls.innerHTML='<label>Colour <input id="paintColor" type="color" value="#ffd54f" aria-label="Paint colour"></label><label>Opacity <select id="paintOpacity"><option value="0.3">Wash 30%</option><option value="0.6" selected>Highlight 60%</option><option value="1">Solid 100%</option></select></label>';
-const clearMine=button('Clear my paint',()=>{if(confirm('Clear all tiles painted by you?'))act({kind:'clearPaint',scope:'mine'});},'');
-const clearAll=button('Clear all paint',()=>{if(confirm('Clear ALL painted tiles for both players?'))act({kind:'clearPaint',scope:'all'});},'');
-document.querySelector('.toolbar').append(rulerButton,rulerControls,paintButton,erasePaintButton,paintControls,clearMine,clearAll);
+const clearMine=button('Clear mine',()=>{if(confirm('Clear all tiles painted by you?'))act({kind:'clearPaint',scope:'mine'});},'');
+const clearAll=button('Clear all',()=>{if(confirm('Clear ALL painted tiles for both players?'))act({kind:'clearPaint',scope:'all'});},'');
+const rulerPin=button('📌',()=>togglePin('ruler'),'pin-toggle');rulerPin.dataset.pin='ruler';
+const paintPin=button('📌',()=>togglePin('paint'),'pin-toggle');paintPin.dataset.pin='paint';
+el('rulerMenuSlot').append(rulerButton,rulerPin);el('paintMenuSlot').append(paintButton,paintPin);
+document.querySelectorAll('.pin-toggle[data-pin]').forEach(b=>{if(!b.onclick)b.onclick=e=>{e.stopPropagation();togglePin(b.dataset.pin);};});
+el('closeToolContext').onclick=()=>{if(rulerMode)rulerButton.click();else if(paintMode)paintButton.click();else el('toolContext').hidden=true;};
+renderPinnedToolbar();
 const rulerRadius=()=>Math.max(1,Math.min(30,Number.parseInt(el('rulerRadius').value,10)||1));
 const rulerColor=()=>/^#[0-9a-f]{6}$/i.test(el('rulerColor').value)?el('rulerColor').value:'#f1c75b';
 const paintColor=()=>/^#[0-9a-f]{6}$/i.test(el('paintColor').value)?el('paintColor').value:'#ffd54f';
@@ -685,7 +837,7 @@ function renderBoard(){const board=el('board'),next=new Map();for(const child of
 }
 function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;populateMapSelect();el('mapSelect').value=room.backgroundMap||'classic';renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
- el('fullscreen').hidden=room.phase!=='play';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
+ el('fullscreen').hidden=room.phase!=='play';el('setupActions').hidden=room.phase!=='setup';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
  el('counts').textContent=room.phase==='setup'?`${room.board.pieces.filter(p=>p.x!==null).length} of your pieces on board · opponent hidden`:`${room.board.pieces.filter(p=>p.x!==null).length} pieces on board`;
  el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play';el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
@@ -701,22 +853,22 @@ function resize(){if(!room)return;if(fit){
  v.scrollLeft=0;v.scrollTop=0;
  }previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
 new ResizeObserver(()=>{if(room&&fit)resize();}).observe(el('viewport'));
-el('fit').onclick=()=>{fit=true;resize();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);resize();};el('mapSelect').onchange=()=>act({kind:'map',map:el('mapSelect').value});el('flip').onclick=()=>{flipped=!flipped;previousPositions.clear();renderBoard();};
+el('fit').onclick=()=>{fit=true;resize();el('fit').classList.add('active');renderPinnedToolbar();closeToolbarMenus();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);el('fit').classList.remove('active');resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);el('fit').classList.remove('active');resize();};el('mapSelect').onchange=()=>act({kind:'map',map:el('mapSelect').value});el('flip').onclick=()=>{flipped=!flipped;el('flip').classList.toggle('active',flipped);previousPositions.clear();renderBoard();renderPinnedToolbar();closeToolbarMenus();};
 el('viewport').addEventListener('wheel',e=>{
  if(!room||e.deltaY===0)return;e.preventDefault();
  const viewport=el('viewport'),board=el('board'),before=board.getBoundingClientRect(),cursorX=e.clientX-before.left,cursorY=e.clientY-before.top,oldCell=cell;
- fit=false;cell=Math.max(14,Math.min(90,cell*(e.deltaY<0?1.1:.9)));document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=Math.round(cell/30*100)+'%';previousPositions.clear();renderBoard();
+ fit=false;el('fit').classList.remove('active');renderPinnedToolbar();cell=Math.max(14,Math.min(90,cell*(e.deltaY<0?1.1:.9)));document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=Math.round(cell/30*100)+'%';previousPositions.clear();renderBoard();
  const after=board.getBoundingClientRect(),scale=cell/oldCell;
  viewport.scrollLeft+=after.left+cursorX*scale-e.clientX;
  viewport.scrollTop+=after.top+cursorY*scale-e.clientY;
 },{passive:false});
-el('ping').onclick=()=>{pingMode=!pingMode;el('ping').classList.toggle('active',pingMode);};
+el('ping').onclick=()=>{pingMode=!pingMode;el('ping').classList.toggle('active',pingMode);rulerMode=false;paintMode=false;rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();closeToolbarMenus();};
 function ping(x,y){if(local)showPing({x,y,team});else if(socket?.readyState===1)socket.send(JSON.stringify({kind:'ping',x,y}));else toast('Reconnect before sending a ping.');}
 function showPing(p){const v=view(p.x,p.y),d=document.createElement('div');d.className='board-ping '+p.team;Object.assign(d.style,{left:`${(v.x+1.5)*cell}px`,top:`${(v.y+1.5)*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),1500);}
 function showDrag(a){const p=room.board.pieces.find(p=>p.id===a.id);if(!p)return;document.querySelectorAll('.drag-preview').forEach(x=>x.remove());const v=view(a.x,a.y,p.w,p.h),d=document.createElement('div');d.className='drag-preview '+a.team;d.textContent=p.label;Object.assign(d.style,{left:`${(v.x+1)*cell}px`,top:`${(v.y+1)*cell}px`,width:`${p.w*cell}px`,height:`${p.h*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),800);}
 el('addReserve').onclick=()=>{if(!placing)return toast('Choose a numbered piece first.');place(placing,null,null);};
 el('savePiece').onclick=()=>act({kind:'edit',id:selected,label:el('label').value.trim(),status:el('pieceStatus').value});el('rotate').onclick=()=>act({kind:'rotate',id:selected});el('reservePiece').onclick=()=>act({kind:'move',id:selected,x:null,y:null});el('remove').onclick=()=>act({kind:'remove',id:selected});
-function cancel(){selected=null;placing=null;pingMode=false;rulerMode=false;paintMode=false;el('ping').classList.remove('active');rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');if(room)render();}el('cancel').onclick=cancel;
+function cancel(){selected=null;placing=null;pingMode=false;rulerMode=false;paintMode=false;paintErase=false;el('ping').classList.remove('active');rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();if(room)render();}el('cancel').onclick=cancel;
 const cursorKeys=new Set();let cursorMoveTimer=null;
 function moveSelectedByKeys(){cursorMoveTimer=null;if(!room||!selected||busy)return;const p=room.board.pieces.find(p=>p.id===selected);if(!p||p.fixed||!editable()||p.x===null)return;const dx=(cursorKeys.has('ArrowRight')?1:0)-(cursorKeys.has('ArrowLeft')?1:0),dy=(cursorKeys.has('ArrowDown')?1:0)-(cursorKeys.has('ArrowUp')?1:0);if(!dx&&!dy)return;const x=p.x+dx,y=p.y+dy;if(x<0||y<0||x+p.w>WIDTH||y+p.h>HEIGHT)return;place({id:p.id},x,y,true);}
 document.addEventListener('keydown',e=>{
@@ -732,7 +884,7 @@ el('reset').onclick=()=>{if(confirm('Reset the entire table for a new setup? Thi
 el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-board-v2',savedAt:new Date().toISOString(),board:room.board},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=saveFilename(room.code);a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
 el('import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Save is too large.');const d=JSON.parse(await f.text());validateBoard(d.board);if(confirm('Replace the entire revealed board with this save?'))await act({kind:'import',board:d.board});}catch(err){toast(err.message);}e.target.value='';};
 async function copyLink(privateLink){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',session.code);u.searchParams.set('server',session.api);if(privateLink)u.hash=new URLSearchParams({resume:session.token}).toString();try{await navigator.clipboard.writeText(u.href);toast(privateLink?'Private resume link copied. Keep it for yourself.':'Invite copied. Send it to the other player.');}catch{prompt('Copy this '+(privateLink?'private resume link':'invite')+':',u.href);}}
-el('invite').onclick=()=>copyLink(false);el('resume').onclick=()=>copyLink(true);el('trayTab').onclick=()=>{el('tray').hidden=false;el('log').hidden=true;el('trayTab').classList.add('active');el('logTab').classList.remove('active');};el('logTab').onclick=()=>{el('tray').hidden=true;el('log').hidden=false;el('logTab').classList.add('active');el('trayTab').classList.remove('active');};
+el('invite').onclick=()=>{copyLink(false);closeToolbarMenus();};el('resume').onclick=()=>{copyLink(true);closeToolbarMenus();};document.querySelectorAll('.toolbar-menu .menu-panel>button:not(.pin-toggle),.toolbar-menu .menu-link').forEach(x=>x.addEventListener('click',()=>closeToolbarMenus()));document.addEventListener('pointerdown',e=>{if(!e.target.closest('.toolbar-menu'))closeToolbarMenus();});el('trayTab').onclick=()=>{el('tray').hidden=false;el('log').hidden=true;el('trayTab').classList.add('active');el('logTab').classList.remove('active');};el('logTab').onclick=()=>{el('tray').hidden=true;el('log').hidden=false;el('logTab').classList.add('active');el('trayTab').classList.remove('active');};
 
 // Middle mouse pans the viewport, including when pressed over a piece.
 let pan=null;

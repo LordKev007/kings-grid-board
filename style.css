@@ -37,3 +37,131 @@
 .toolbar-link{display:inline-grid;place-items:center;width:34px;height:34px;border:1px solid #46535d;border-radius:7px;background:#29353f;color:#eef1f2;text-decoration:none;font-size:15px}.toolbar-link:hover{background:#3a4a56}.map-control select{min-width:132px}
 
 .paint-controls{display:flex;align-items:center;gap:7px}.paint-controls label{display:flex;align-items:center;gap:4px;color:#b9c3ca;font-size:11px}.paint-controls input[type=color],.ruler-controls input[type=color]{width:34px;height:30px;padding:2px;min-width:34px}.paint-controls select{width:104px;padding:6px;font-size:11px}.paint-cell{position:absolute;z-index:1;pointer-events:none;box-shadow:inset 0 0 0 1px #ffffff24}.ruler-cell{z-index:2}.piece{z-index:3}.piece.distracted .statusMark{color:#ffe27a;font-size:15px;text-shadow:0 1px 2px #000}.piece.distracted{box-shadow:0 0 0 2px #ffe27a99,0 2px 3px #0005}
+
+/* v0.2.19 compact, personalisable in-game toolbar */
+.compact-toolbar{
+  min-height:46px;
+  padding:7px 14px;
+  gap:6px;
+  flex-wrap:nowrap;
+  position:relative;
+  z-index:60;
+  background:#18232b;
+}
+.compact-toolbar #connection{white-space:nowrap;margin-right:4px}
+.setup-actions{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.setup-actions button{padding:6px 9px}
+.compact-toolbar>button,.compact-toolbar summary,.pinned-action{
+  min-height:32px;
+  padding:6px 9px;
+  border-radius:6px;
+  white-space:nowrap;
+}
+.compact-map{margin:0;display:block}
+.compact-map select{min-width:118px;max-width:160px;height:32px;padding:5px 27px 5px 8px;border-radius:6px}
+.pinned-tools{display:flex;align-items:center;gap:5px}
+.pinned-action{font-size:12px}
+.toolbar-menu{position:relative}
+.toolbar-menu>summary{
+  list-style:none;
+  display:grid;
+  place-items:center;
+  border:1px solid #46535d;
+  background:#29353f;
+  color:#eef1f2;
+  cursor:pointer;
+  user-select:none;
+}
+.toolbar-menu>summary::-webkit-details-marker{display:none}
+.toolbar-menu>summary:after{content:'▾';font-size:9px;margin-left:5px;color:#9fb0bb}
+.toolbar-menu[open]>summary,.toolbar-menu>summary:hover{background:#3a4a56}
+.menu-panel{
+  position:absolute;
+  right:0;
+  top:calc(100% + 7px);
+  width:max-content;
+  min-width:178px;
+  max-width:min(320px,calc(100vw - 24px));
+  padding:7px;
+  border:1px solid #46535d;
+  border-radius:8px;
+  background:#202c35;
+  box-shadow:0 12px 34px #0009;
+  display:grid;
+  gap:5px;
+  z-index:100;
+}
+.menu-panel button,.menu-panel .filebutton,.menu-panel .menu-link{
+  width:100%;
+  min-height:32px;
+  margin:0;
+  padding:7px 9px;
+  text-align:left;
+  font-size:12px;
+  border-radius:6px;
+}
+.menu-link{
+  display:block;
+  border:1px solid #46535d;
+  background:#29353f;
+  color:#eef1f2;
+  text-decoration:none;
+  cursor:pointer;
+}
+.menu-link:hover{background:#3a4a56}
+.menu-file{display:block}
+.menu-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:center}
+.menu-row>button:first-child{min-width:0}
+.menu-row .pin-toggle{
+  width:34px;
+  min-width:34px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+.pin-toggle.pinned{border-color:var(--gold);color:var(--gold)}
+.zoom-row{grid-template-columns:38px minmax(62px,1fr) 38px}
+.zoom-row output{display:grid;place-items:center;color:#b9c3ca;font-size:11px}
+.tool-context{
+  min-height:42px;
+  padding:6px 14px;
+  border-bottom:1px solid var(--line);
+  background:#1d2932;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  position:relative;
+  z-index:45;
+}
+.tool-context>strong{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+#toolContextBody{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool-context button,.tool-context input,.tool-context select{min-height:30px;padding:5px 8px;font-size:11px}
+.context-close{margin-left:auto;width:30px!important;padding:0!important;font-size:18px!important}
+.tool-context .ruler-controls,.tool-context .paint-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tool-context label{display:flex;align-items:center;gap:4px;font-size:11px}
+.tool-context input[type=number]{width:58px}
+.tool-context input[type=color]{width:34px;height:30px;padding:2px}
+.tool-context select{width:auto;min-width:92px}
+
+/* The toolbar now owns less vertical space; preserve the board area. */
+.workspace{height:calc(100vh - 136px)}
+.tool-context:not([hidden]) + .workspace{height:calc(100vh - 178px)}
+
+@media(max-width:900px){
+  .compact-toolbar{overflow-x:auto;overflow-y:visible;scrollbar-width:thin}
+  .compact-toolbar .spacer{min-width:4px}
+  .compact-map select{min-width:108px;max-width:130px}
+  .menu-panel{position:fixed;right:10px;top:136px}
+  .tool-context{overflow-x:auto;flex-wrap:nowrap}
+  #toolContextBody{flex-wrap:nowrap}
+}
+@media(max-width:600px){
+  .compact-toolbar{padding:6px 8px;gap:4px}
+  .compact-toolbar #connection{font-size:11px}
+  .compact-toolbar>button,.compact-toolbar summary,.pinned-action{padding:5px 7px}
+  .compact-map select{min-width:100px;max-width:112px}
+  .setup-actions #turnLabel{display:none}
+  .workspace{height:auto}
+  .tool-context:not([hidden]) + .workspace{height:auto}
+}
