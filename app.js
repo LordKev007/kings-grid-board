@@ -55,7 +55,7 @@ async function launch(join){
 }
 el('create').onclick=()=>launch(false);el('join').onclick=()=>launch(true);
 el('local').onclick=()=>{local=true;team='red';session=null;localState=read('kg-board-v2-local');if(!localState?.phase){localState=newRoom('LOCAL','Red player','red','local-red','red');localState.players.push({name:'Blue player',team:'blue',token:'local-blue'});}connected=true;enter(publicRoom(localState,team));};
-function enter(r){room=r;selected=null;placing=null;previousPositions.clear();el('welcome').hidden=true;el('table').hidden=false;el('leave').hidden=false;el('invite').hidden=el('resume').hidden=local;el('localSwitch').hidden=!local;el('moreInvite').hidden=local;el('moreResume').hidden=local;el('moreLeave').hidden=local;fit=true;render();status();requestAnimationFrame(resize);}
+function enter(r){room=r;selected=null;placing=null;previousPositions.clear();el('welcome').hidden=true;el('table').hidden=false;el('leave').hidden=false;el('invite').hidden=el('resume').hidden=local;el('localSwitch').hidden=!local;fit=true;render();status();requestAnimationFrame(resize);}
 function status(){el('connection').textContent=local?'● Local test · one computer':connected?'● Connected · changes saved':'● Reconnecting · editing paused';el('connection').classList.toggle('offline',!local&&!connected);}
 function stopSocket(){generation++;clearTimeout(retry);clearInterval(heartbeat);if(socket){socket.onclose=null;socket.close();socket=null;}connected=false;}
 async function connect(){stopSocket();const gen=generation;status();try{const d=await request(`/api/rooms/${session.code}/ticket`,{body:{}});if(gen!==generation)return;const u=new URL(session.api);u.protocol=u.protocol==='https:'?'wss:':'ws:';u.pathname=`/api/rooms/${session.code}/ws`;u.searchParams.set('ticket',d.ticket);socket=new WebSocket(u);
@@ -64,7 +64,7 @@ async function connect(){stopSocket();const gen=generation;status();try{const d=
  socket.onclose=()=>{connected=false;status();clearInterval(heartbeat);retry=setTimeout(connect,2000);};socket.onerror=()=>socket?.close();
  }catch{if(gen===generation){connected=false;status();retry=setTimeout(connect,3000);}}}
 el('leave').onclick=async()=>{if(busy)return;if(local){stopSocket();room=null;session=null;el('table').hidden=true;el('welcome').hidden=false;el('leave').hidden=true;el('roomInfo').textContent='31 × 21 · Your board, your rules';return;}
- const leaving=session;if(!leaving)return;busy=true;el('leave').disabled=true;el('moreLeave').disabled=true;
+ const leaving=session;if(!leaving)return;busy=true;el('leave').disabled=true;
  try{await request(`/api/rooms/${leaving.code}/leave`,{body:{},token:leaving.token,api:leaving.api});forget(key(leaving.api,leaving.code));const last=read('kg-board-last-session');if(last?.code===leaving.code&&last?.token===leaving.token)forget('kg-board-last-session');stopSocket();room=null;session=null;el('table').hidden=true;el('welcome').hidden=false;el('leave').hidden=true;el('roomInfo').textContent='31 × 21 · Your board, your rules';toast('Seat released. This table can now be joined from another device.');}
  catch(e){toast(e.message||'Could not release this seat.');}
  finally{busy=false;el('leave').disabled=false;}
@@ -78,68 +78,60 @@ async function act(action){if(busy)return toast('Wait for the current edit to fi
 el('localSwitch').onclick=()=>{team=other(team);selected=null;placing=null;previousPositions.clear();update(publicRoom(localState,team));toast(`Now viewing as ${team}. This is a local two-seat test.`);};
 el('ready').onclick=()=>{selected=null;placing=null;act({kind:'ready'});};
 function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
-const closeToolbarMenus=()=>document.querySelectorAll('.toolbar-menu[open], .rail-menu[open]').forEach(d=>d.removeAttribute('open'));
+const closeToolbarMenus=()=>document.querySelectorAll('.toolbar-menu[open]').forEach(d=>d.removeAttribute('open'));
+function syncRail(){
+ const set=(id,on)=>el(id)?.classList.toggle('active',!!on);
+ set('railPing',pingMode);set('railRuler',rulerMode);set('railPaint',paintMode);set('railFlip',flipped);
+}
+function closeToolPopover(){el('toolContext').hidden=true;}
+function closeMorePopover(){el('morePopover').hidden=true;}
 const toolbarPinsKey='kg-toolbar-pins';
 let toolbarPins=new Set(read(toolbarPinsKey,[]));
 const allowedPins=new Set(['ping','ruler','paint','fit','flip']);toolbarPins=new Set([...toolbarPins].filter(x=>allowedPins.has(x)));
 let rulerButton,paintButton,erasePaintButton;
 function showToolContext(kind){
  const box=el('toolContext'),body=el('toolContextBody');body.replaceChildren();
+ closeMorePopover();
  if(kind==='ruler'&&rulerMode){el('toolContextLabel').textContent='Ruler';body.append(rulerControls);box.hidden=false;}
- else if(kind==='paint'&&paintMode){el('toolContextLabel').textContent=paintErase?'Erase paint':'Paint';body.append(paintControls,erasePaintButton,clearMine,clearAll);box.hidden=false;}
+ else if(kind==='paint'&&paintMode){el('toolContextLabel').textContent=paintErase?'Erase paint':'Paint';body.append(paintControls,erasePaintButton);const actions=document.createElement('div');actions.className='kg-paint-actions';actions.append(clearMine,clearAll);body.append(actions);box.hidden=false;}
  else box.hidden=true;
+ syncRail();
 }
-function togglePin(id){if(toolbarPins.has(id))toolbarPins.delete(id);else toolbarPins.add(id);write(toolbarPinsKey,[...toolbarPins]);renderPinnedToolbar();syncToolRail();}
+function togglePin(id){if(toolbarPins.has(id))toolbarPins.delete(id);else toolbarPins.add(id);write(toolbarPinsKey,[...toolbarPins]);renderPinnedToolbar();}
 function sourceForPin(id){return {ping:el('ping'),ruler:rulerButton,paint:paintButton,fit:el('fit'),flip:el('flip')}[id]||null;}
 function pinLabel(id){return {ping:'◎ Ping',ruler:'◎ Ruler',paint:'▦ Paint',fit:'Fit',flip:'Flip'}[id]||id;}
 function renderPinnedToolbar(){
  document.querySelectorAll('.pin-toggle').forEach(b=>{const on=toolbarPins.has(b.dataset.pin);b.classList.toggle('pinned',on);b.textContent=on?'📍':'📌';b.title=on?'Unpin from this browser’s toolbar':'Pin to this browser’s toolbar';});
- const host=el('pinnedTools');if(!host)return;host.replaceChildren();
- for(const id of ['ping','ruler','paint','fit','flip'])if(toolbarPins.has(id)){const src=sourceForPin(id),b=button(pinLabel(id),()=>{src?.click();renderPinnedToolbar();syncToolRail();closeToolbarMenus();},'pinned-action');b.dataset.tool=id;b.classList.toggle('active',!!src?.classList.contains('active'));host.append(b);}
+ const host=el('pinnedTools');host.replaceChildren();
+ for(const id of ['ping','ruler','paint','fit','flip'])if(toolbarPins.has(id)){const src=sourceForPin(id),b=button(pinLabel(id),()=>{src?.click();renderPinnedToolbar();closeToolbarMenus();},'pinned-action');b.dataset.tool=id;b.classList.toggle('active',!!src?.classList.contains('active'));host.append(b);}
 }
-function syncToolRail(){
- const set=(id,on)=>el(id)?.classList.toggle('active',!!on);
- set('railSelect',!pingMode&&!rulerMode&&!paintMode);
- set('railPing',pingMode);
- set('railRuler',rulerMode);
- set('railPaint',paintMode&&!paintErase);
- set('railErase',paintMode&&paintErase);
- set('railFit',fit);
- set('railFlip',flipped);
-}
-rulerButton=button('◎ Ruler',()=>{rulerMode=!rulerMode;paintMode=false;rulerButton.classList.toggle('active',rulerMode);paintButton?.classList.remove('active');erasePaintButton?.classList.remove('active');if(rulerMode)toast('Ruler mode: click any board tile, then enter a radius.');else{rulerOrigin=null;privateRuler=null;publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));render();}showToolContext(rulerMode?'ruler':null);renderPinnedToolbar();syncToolRail();closeToolbarMenus();},'');
+rulerButton=button('◎ Ruler',()=>{rulerMode=!rulerMode;paintMode=false;rulerButton.classList.toggle('active',rulerMode);paintButton?.classList.remove('active');erasePaintButton?.classList.remove('active');if(rulerMode)toast('Ruler mode: click any board tile, then enter a radius.');else{rulerOrigin=null;privateRuler=null;publicRuler=null;if(!local&&socket?.readyState===1)socket.send(JSON.stringify({kind:'rulerClear'}));render();}showToolContext(rulerMode?'ruler':null);renderPinnedToolbar();syncRail();closeToolbarMenus();},'');
 const rulerControls=document.createElement('span');rulerControls.className='ruler-controls';rulerControls.innerHTML='<label>Radius <input id="rulerRadius" type="number" min="1" max="30" value="5"></label><label>Colour <input id="rulerColor" type="color" value="#f1c75b" aria-label="Ruler colour"></label><label>Show to <select id="rulerScope"><option value="private">Only me</option><option value="public">Both players</option></select></label>';
-paintButton=button('▦ Paint',()=>{paintMode=!paintMode;paintErase=false;rulerMode=false;paintButton.classList.toggle('active',paintMode);erasePaintButton.classList.remove('active');rulerButton.classList.remove('active');if(paintMode)toast('Paint mode: click any tile. Paint stays until erased.');showToolContext(paintMode?'paint':null);renderPinnedToolbar();syncToolRail();closeToolbarMenus();},'');
-erasePaintButton=button('⌫ Erase',()=>{paintMode=true;paintErase=!paintErase;rulerMode=false;erasePaintButton.classList.toggle('active',paintErase);paintButton.classList.toggle('active',paintMode&&!paintErase);rulerButton.classList.remove('active');showToolContext('paint');renderPinnedToolbar();syncToolRail();if(paintErase)toast('Erase mode: click painted tiles to clear them.');},'');
-const paintControls=document.createElement('span');paintControls.className='paint-controls';paintControls.innerHTML='<label>Colour <input id="paintColor" type="color" value="#ffd54f" aria-label="Paint colour"></label><label class="opacity-row">Opacity <input id="paintOpacity" type="range" min="10" max="100" step="5" value="60" aria-label="Paint opacity"><output id="paintOpacityLabel">60%</output></label>';
+paintButton=button('▦ Paint',()=>{paintMode=!paintMode;paintErase=false;rulerMode=false;paintButton.classList.toggle('active',paintMode);erasePaintButton.classList.remove('active');rulerButton.classList.remove('active');if(paintMode)toast('Paint mode: click any tile. Paint stays until erased.');showToolContext(paintMode?'paint':null);renderPinnedToolbar();syncRail();closeToolbarMenus();},'');
+erasePaintButton=button('⌫ Erase',()=>{paintMode=true;paintErase=!paintErase;rulerMode=false;erasePaintButton.classList.toggle('active',paintErase);paintButton.classList.toggle('active',paintMode&&!paintErase);rulerButton.classList.remove('active');showToolContext('paint');renderPinnedToolbar();syncRail();if(paintErase)toast('Erase mode: click painted tiles to clear them.');},'');
+const paintControls=document.createElement('span');paintControls.className='paint-controls';paintControls.innerHTML='<label>Colour <input id="paintColor" type="color" value="#ffd54f" aria-label="Paint colour"></label><label>Opacity <span class="opacity-control"><input id="paintOpacity" type="range" min="10" max="100" step="5" value="60" aria-label="Paint opacity"><output id="paintOpacityLabel">60%</output></span></label>';
 const clearMine=button('Clear mine',()=>{if(confirm('Clear all tiles painted by you?'))act({kind:'clearPaint',scope:'mine'});},'');
 const clearAll=button('Clear all',()=>{if(confirm('Clear ALL painted tiles for both players?'))act({kind:'clearPaint',scope:'all'});},'');
 const rulerPin=button('📌',()=>togglePin('ruler'),'pin-toggle');rulerPin.dataset.pin='ruler';
 const paintPin=button('📌',()=>togglePin('paint'),'pin-toggle');paintPin.dataset.pin='paint';
 el('rulerMenuSlot').append(rulerButton,rulerPin);el('paintMenuSlot').append(paintButton,paintPin);
 document.querySelectorAll('.pin-toggle[data-pin]').forEach(b=>{if(!b.onclick)b.onclick=e=>{e.stopPropagation();togglePin(b.dataset.pin);};});
-el('closeToolContext').onclick=()=>{if(rulerMode)rulerButton.click();else if(paintMode)paintButton.click();else el('toolContext').hidden=true;};
+el('closeToolContext').onclick=()=>{if(rulerMode)rulerButton.click();else if(paintMode)paintButton.click();else closeToolPopover();};
 renderPinnedToolbar();
-syncToolRail();
-el('railSelect').onclick=()=>cancel();
+syncRail();
 el('railPing').onclick=()=>el('ping').click();
 el('railRuler').onclick=()=>rulerButton.click();
 el('railPaint').onclick=()=>paintButton.click();
-el('railErase').onclick=()=>erasePaintButton.click();
-el('railFit').onclick=()=>el('fit').click();
-el('railFlip').onclick=()=>el('flip').click();
-el('moreInvite').onclick=()=>{closeToolbarMenus();el('invite').click();el('moreMenu')?.removeAttribute('open');};
-el('moreResume').onclick=()=>{closeToolbarMenus();el('resume').click();el('moreMenu')?.removeAttribute('open');};
-el('moreBackgrounds').onclick=()=>{el('moreMenu')?.removeAttribute('open');location.href=el('backgroundEditor').href;};
-el('moreExport').onclick=()=>{closeToolbarMenus();el('export').click();el('moreMenu')?.removeAttribute('open');};
-el('moreImport').onclick=()=>{closeToolbarMenus();el('import').click();el('moreMenu')?.removeAttribute('open');};
-el('moreUpdate').onclick=()=>{closeToolbarMenus();el('update').click();el('moreMenu')?.removeAttribute('open');};
-el('moreLeave').onclick=()=>{closeToolbarMenus();el('leave').click();el('moreMenu')?.removeAttribute('open');};
+el('railFit').onclick=()=>{el('fit').click();closeToolPopover();};
+el('railFlip').onclick=()=>{el('flip').click();closeToolPopover();};
+el('railMore').onclick=()=>{closeToolPopover();el('morePopover').hidden=!el('morePopover').hidden;};
+el('closeMore').onclick=closeMorePopover;
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.kg-popover')&&!e.target.closest('#railRuler')&&!e.target.closest('#railPaint')&&!e.target.closest('#railMore')){closeToolPopover();closeMorePopover();}},true);
 const rulerRadius=()=>Math.max(1,Math.min(30,Number.parseInt(el('rulerRadius').value,10)||1));
 const rulerColor=()=>/^#[0-9a-f]{6}$/i.test(el('rulerColor').value)?el('rulerColor').value:'#f1c75b';
 const paintColor=()=>/^#[0-9a-f]{6}$/i.test(el('paintColor').value)?el('paintColor').value:'#ffd54f';
-const paintOpacity=()=>Math.max(0,Math.min(1,(Number(el('paintOpacity').value)||60)/100));
-const updatePaintOpacityLabel=()=>{const out=el('paintOpacityLabel');if(out)out.textContent=`${Math.round(Number(el('paintOpacity').value)||60)}%`;};
+const paintOpacity=()=>Math.max(.1,Math.min(1,(Number(el('paintOpacity').value)||60)/100));
+const updatePaintOpacityLabel=()=>{el('paintOpacityLabel').textContent=`${Math.round(Number(el('paintOpacity').value)||60)}%`;};
 el('rulerColor').value=read('kg-ruler-color','#f1c75b');el('paintColor').value=read('kg-paint-color','#ffd54f');el('paintOpacity').value=String(Math.round((read('kg-paint-opacity',.6)||.6)*100));updatePaintOpacityLabel();
 el('rulerColor').oninput=()=>{write('kg-ruler-color',el('rulerColor').value);if(rulerOrigin)setRulerOrigin(rulerOrigin.x,rulerOrigin.y);};
 el('paintColor').oninput=()=>write('kg-paint-color',el('paintColor').value);el('paintOpacity').oninput=()=>{updatePaintOpacityLabel();write('kg-paint-opacity',paintOpacity());};
@@ -200,7 +192,7 @@ function renderBoard(){const board=el('board'),next=new Map();for(const child of
  const prev=previousPositions.get(p.id);if(prev&&(prev.left!==left||prev.top!==top)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)d.animate([{transform:`translate(${prev.left-left}px,${prev.top-top}px)`},{transform:'translate(0,0)'}],{duration:280,easing:'ease-out'});next.set(p.id,{left,top});
  }previousPositions=next;renderWallEditor(board);
 }
-function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;populateMapSelect();el('mapSelect').value=room.backgroundMap||'classic';syncToolRail();renderCatalog();renderBoard();
+function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id===selected))selected=null;populateMapSelect();el('mapSelect').value=room.backgroundMap||'classic';syncRail();renderCatalog();renderBoard();
  el('roomInfo').textContent=local?`LOCAL TEST · viewing ${team}`:`Room ${room.code} · ${room.players.map(p=>p.name+' ('+p.team+')').join(' / ')}`;
  el('fullscreen').hidden=room.phase!=='play';el('setupActions').hidden=room.phase!=='setup';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
@@ -218,22 +210,22 @@ function resize(){if(!room)return;if(fit){
  v.scrollLeft=0;v.scrollTop=0;
  }previousPositions.clear();document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=fit?'Fit':Math.round(cell/30*100)+'%';renderBoard();}
 new ResizeObserver(()=>{if(room&&fit)resize();}).observe(el('viewport'));
-el('fit').onclick=()=>{fit=true;resize();el('fit').classList.add('active');renderPinnedToolbar();syncToolRail();closeToolbarMenus();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);el('fit').classList.remove('active');resize();syncToolRail();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);el('fit').classList.remove('active');resize();syncToolRail();};el('mapSelect').onchange=()=>act({kind:'map',map:el('mapSelect').value});el('flip').onclick=()=>{flipped=!flipped;el('flip').classList.toggle('active',flipped);previousPositions.clear();renderBoard();renderPinnedToolbar();syncToolRail();closeToolbarMenus();};
+el('fit').onclick=()=>{fit=true;resize();renderPinnedToolbar();syncRail();closeToolbarMenus();};el('plus').onclick=()=>{fit=false;cell=Math.min(90,cell+5);resize();};el('minus').onclick=()=>{fit=false;cell=Math.max(14,cell-5);resize();};el('mapSelect').onchange=()=>act({kind:'map',map:el('mapSelect').value});el('flip').onclick=()=>{flipped=!flipped;previousPositions.clear();renderBoard();renderPinnedToolbar();syncRail();closeToolbarMenus();};
 el('viewport').addEventListener('wheel',e=>{
  if(!room||e.deltaY===0)return;e.preventDefault();
  const viewport=el('viewport'),board=el('board'),before=board.getBoundingClientRect(),cursorX=e.clientX-before.left,cursorY=e.clientY-before.top,oldCell=cell;
- fit=false;el('fit').classList.remove('active');renderPinnedToolbar();syncToolRail();cell=Math.max(14,Math.min(90,cell*(e.deltaY<0?1.1:.9)));document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=Math.round(cell/30*100)+'%';previousPositions.clear();renderBoard();
+ fit=false;renderPinnedToolbar();cell=Math.max(14,Math.min(90,cell*(e.deltaY<0?1.1:.9)));document.documentElement.style.setProperty('--cell',cell+'px');el('zoomLabel').textContent=Math.round(cell/30*100)+'%';previousPositions.clear();renderBoard();
  const after=board.getBoundingClientRect(),scale=cell/oldCell;
  viewport.scrollLeft+=after.left+cursorX*scale-e.clientX;
  viewport.scrollTop+=after.top+cursorY*scale-e.clientY;
 },{passive:false});
-el('ping').onclick=()=>{pingMode=!pingMode;el('ping').classList.toggle('active',pingMode);rulerMode=false;paintMode=false;paintErase=false;rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();syncToolRail();closeToolbarMenus();};
-function ping(x,y){if(local)showPing({x,y,team});else if(socket?.readyState===1)socket.send(JSON.stringify({kind:'ping',x,y}));else toast('Reconnect before sending a ping.');}
+el('ping').onclick=()=>{pingMode=!pingMode;el('ping').classList.toggle('active',pingMode);rulerMode=false;paintMode=false;paintErase=false;rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();syncRail();closeToolbarMenus();if(pingMode)toast('Ping: click one tile. Shift-click always pings without entering the tool.');};
+function ping(x,y){if(local)showPing({x,y,team});else if(socket?.readyState===1)socket.send(JSON.stringify({kind:'ping',x,y}));else toast('Reconnect before sending a ping.');if(pingMode){pingMode=false;el('ping').classList.remove('active');syncRail();}}
 function showPing(p){const v=view(p.x,p.y),d=document.createElement('div');d.className='board-ping '+p.team;Object.assign(d.style,{left:`${(v.x+1.5)*cell}px`,top:`${(v.y+1.5)*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),1500);}
 function showDrag(a){const p=room.board.pieces.find(p=>p.id===a.id);if(!p)return;document.querySelectorAll('.drag-preview').forEach(x=>x.remove());const v=view(a.x,a.y,p.w,p.h),d=document.createElement('div');d.className='drag-preview '+a.team;d.textContent=p.label;Object.assign(d.style,{left:`${(v.x+1)*cell}px`,top:`${(v.y+1)*cell}px`,width:`${p.w*cell}px`,height:`${p.h*cell}px`});el('board').append(d);setTimeout(()=>d.remove(),800);}
 el('addReserve').onclick=()=>{if(!placing)return toast('Choose a numbered piece first.');place(placing,null,null);};
 el('savePiece').onclick=()=>act({kind:'edit',id:selected,label:el('label').value.trim(),status:el('pieceStatus').value});el('rotate').onclick=()=>act({kind:'rotate',id:selected});el('reservePiece').onclick=()=>act({kind:'move',id:selected,x:null,y:null});el('remove').onclick=()=>act({kind:'remove',id:selected});
-function cancel(){selected=null;placing=null;pingMode=false;rulerMode=false;paintMode=false;paintErase=false;el('ping').classList.remove('active');rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();syncToolRail();if(room)render();}el('cancel').onclick=cancel;
+function cancel(){selected=null;placing=null;pingMode=false;rulerMode=false;paintMode=false;paintErase=false;el('ping').classList.remove('active');rulerButton.classList.remove('active');paintButton.classList.remove('active');erasePaintButton.classList.remove('active');showToolContext(null);renderPinnedToolbar();syncRail();closeMorePopover();if(room)render();}el('cancel').onclick=cancel;
 const cursorKeys=new Set();let cursorMoveTimer=null;
 function moveSelectedByKeys(){cursorMoveTimer=null;if(!room||!selected||busy)return;const p=room.board.pieces.find(p=>p.id===selected);if(!p||p.fixed||!editable()||p.x===null)return;const dx=(cursorKeys.has('ArrowRight')?1:0)-(cursorKeys.has('ArrowLeft')?1:0),dy=(cursorKeys.has('ArrowDown')?1:0)-(cursorKeys.has('ArrowUp')?1:0);if(!dx&&!dy)return;const x=p.x+dx,y=p.y+dy;if(x<0||y<0||x+p.w>WIDTH||y+p.h>HEIGHT)return;place({id:p.id},x,y,true);}
 document.addEventListener('keydown',e=>{

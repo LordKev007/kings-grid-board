@@ -166,53 +166,37 @@
   .tool-context:not([hidden]) + .workspace{height:auto}
 }
 
-/* v0.2.20 Photoshop-style layout */
-#table{display:flex;flex-direction:column;min-height:calc(100vh - 90px)}
-.compact-toolbar{padding:10px 16px;gap:10px;align-items:center;min-height:58px;background:#141c23;flex-wrap:nowrap}
-.compact-toolbar .map-control{display:flex;align-items:center}
-.compact-toolbar .map-control select{min-width:190px;max-width:220px}
-#setupActions{display:flex;align-items:center;gap:8px;white-space:nowrap}
-#setupActions #turnLabel{margin-right:4px}
-#tableMenu>summary{min-width:72px;justify-content:center}
-#pinnedTools,#toolsMenu,#viewMenu{display:none!important}
-.workspace{display:grid;grid-template-columns:250px minmax(0,1fr) 96px;height:calc(100vh - 148px)}
-aside{padding:14px;border-right:1px solid var(--line);overflow-y:auto;background:#1b252e}
-.boardsection{padding:12px 14px 12px;overflow:hidden}
-#hint{padding:0 0 10px;min-height:26px}
-#viewport{padding:12px}
-.tool-context{padding:10px 16px;border-bottom:1px solid var(--line);background:#18222b;display:flex;align-items:center;gap:10px}
-.tool-context>strong{min-width:52px}
-.tool-context button,.tool-context input,.tool-context select,.tool-context output{font-size:11px}
-.tool-context output{color:#b8c7d1;font-size:11px;min-width:42px;text-align:right}
-.tool-context .paint-controls input[type=range]{width:150px}
-.tool-context .paint-controls select{min-width:110px}
-.tool-context .paint-controls label.opacity-row{display:flex;align-items:center;gap:8px}
-.toolrail{padding:12px 10px;border-left:1px solid var(--line);border-right:none;background:#17212a;display:flex;flex-direction:column;gap:10px;overflow:visible}
-.rail-button,.rail-menu>summary{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:72px;padding:10px 8px;border:1px solid #33444f;border-radius:14px;background:#22303a;color:#eef1f2;cursor:pointer;list-style:none;user-select:none;text-align:center}
-.rail-menu>summary::-webkit-details-marker{display:none}
-.rail-button:hover,.rail-menu>summary:hover{background:#2c3a45}
-.rail-button.active,.rail-menu[open]>summary{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:#263844}
-.rail-icon{font-size:20px;line-height:1}
-.rail-menu{position:relative}
-.rail-menu-panel{position:absolute;right:calc(100% + 10px);bottom:0;min-width:220px;padding:8px;background:#202c35;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.45);display:grid;gap:6px;z-index:60}
-.rail-menu-panel button{width:100%;text-align:left;padding:9px 10px}
-.menu-link{display:block;width:100%;padding:9px 10px;border:1px solid #46535d;border-radius:7px;background:#29353f;color:#eef1f2;text-decoration:none;cursor:pointer}
-.menu-link:hover{background:#3a4a56}
-.boardfooter{padding:8px 2px 10px}
-@media(max-width:1100px){
-  .workspace{grid-template-columns:210px minmax(0,1fr) 88px}
-  .compact-toolbar .map-control select{min-width:150px;max-width:170px}
-}
-@media(max-width:850px){
-  .compact-toolbar{flex-wrap:wrap;overflow-x:visible}
-  .workspace{grid-template-columns:180px minmax(0,1fr) 82px;height:auto}
-  .tool-context:not([hidden]) + .workspace{height:auto}
-  .rail-button,.rail-menu>summary{min-height:64px;padding:8px 6px}
-}
-@media(max-width:600px){
-  .workspace{grid-template-columns:1fr;gap:0}
-  aside{border-right:none;border-bottom:1px solid var(--line)}
-  .toolrail{flex-direction:row;flex-wrap:wrap;border-left:none;border-top:1px solid var(--line)}
-  .rail-button,.rail-menu>summary{min-height:58px;flex:1 1 92px}
-  .rail-menu-panel{right:0;bottom:calc(100% + 8px)}
-}
+/* v0.2.21 stable VTT-style layout */
+#table{min-height:calc(100vh - 90px)}
+.kg-topbar{min-height:56px;padding:9px 16px;flex-wrap:nowrap;background:#141c23}
+.kg-topbar .compact-map select{min-width:170px;max-width:210px}
+.kg-workspace{display:grid;grid-template-columns:240px minmax(0,1fr) 54px;height:calc(100vh - 146px)}
+.kg-workspace>.boardsection{min-width:0;min-height:0;padding:0 12px 10px}
+.kg-workspace>#hint{min-height:0}
+.kg-rail{background:#17212a;border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 6px;z-index:25}
+.kg-tool{width:40px;height:40px;min-width:40px;padding:0;border-radius:8px;display:grid;place-items:center;font-size:17px;background:#22303a}
+.kg-tool span{line-height:1;pointer-events:none}
+.kg-tool.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:#2c3942}
+.kg-rail-sep{width:28px;border-top:1px solid #3a4853;margin:2px 0}
+.kg-popover{position:fixed;right:62px;top:170px;width:245px;padding:10px;background:#202c35;border:1px solid #52616c;border-radius:10px;box-shadow:0 16px 48px #0008;z-index:100}
+.kg-pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.kg-pop-head strong{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--gold)}
+.kg-pop-head button{width:28px;height:28px;padding:0;font-size:17px}
+#toolContextBody{display:grid;gap:9px}
+#toolContextBody .ruler-controls,#toolContextBody .paint-controls{display:grid;gap:9px}
+#toolContextBody label{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:8px;font-size:11px}
+#toolContextBody input[type=number],#toolContextBody select{width:100%}
+#toolContextBody input[type=color]{width:42px;height:30px;padding:2px}
+#toolContextBody input[type=range]{width:100%}
+.kg-paint-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kg-paint-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kg-popover button{font-size:11px;padding:7px 9px}
+.kg-more-popover{top:auto;bottom:18px}
+.kg-more-grid{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:6px;margin-bottom:8px}
+.kg-more-grid output{text-align:center;color:#c7d1d8;font-size:11px}
+#viewport{touch-action:none}
+#legacyControls{display:none!important}
+.tool-context{display:none!important}
+@media(max-width:900px){.kg-workspace{grid-template-columns:190px minmax(0,1fr) 50px}.kg-topbar .compact-map select{min-width:125px;max-width:150px}}
+@media(max-width:650px){.kg-workspace{grid-template-columns:145px minmax(0,1fr) 46px}.kg-tool{width:36px;height:36px;min-width:36px}.kg-popover{right:52px;width:220px}.kg-topbar{overflow-x:auto}.boardfooter span:last-child{display:none}}
+.opacity-control{display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:7px}.opacity-control output{text-align:right;color:#c7d1d8;font-size:11px}
