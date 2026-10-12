@@ -48,7 +48,8 @@ export function changeBoard(original,action){
  switch(action.kind){
  case 'add': {
   const t=CATALOG.find(t=>t.id===action.type);if(!t)throw Error('Unknown piece type.');
-  const p={id:action.id,type:t.id,team:action.team,label:action.label||`${t.short} ${action.copyNo??1}`,x:action.x??null,y:action.y??null,w:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?1:5):1,h:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?5:1):1,status:'normal',copyNo:action.copyNo??1};
+  if(t.kind==='camp'&&(action.copyNo??1)!==1)throw Error('Each player has one of each camp.');
+  const p={id:action.id,type:t.id,team:action.team,label:action.label||(t.kind==='camp'?t.name:`${t.short} ${action.copyNo??1}`),x:action.x??null,y:action.y??null,w:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?1:5):1,h:['woodwall','stonewall','ironwall'].includes(t.id)?(action.vertical?5:1):1,status:'normal',copyNo:action.copyNo??1};
   if(wallMaxHP(p.type)!==null)p.hp=wallMaxHP(p.type);
   b.nextNumber++;b.pieces.push(p);description=`Added ${p.label}`;break;
  }

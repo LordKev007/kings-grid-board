@@ -165,3 +165,11 @@
 /* Distracted: the unit is shown upside down with a large music note over its centre */
 .piece.distracted .token-art,.piece.distracted .placeholder{transform:scaleY(-1)}
 .piece.distracted .statusMark{inset:0;display:grid;place-items:center;font-size:calc(var(--cell)*.62);line-height:1;color:#ffe27a;text-shadow:0 0 3px #000,0 1px 2px #000;pointer-events:none}
+
+/* v0.2.24 camps: full-tile markers under units; the team-coloured rim stays visible around a unit standing on one */
+.piece.camp,.piece.camp.selected{z-index:1;border-radius:3px;background:#0b5d14}
+.piece.camp .token-art{object-fit:cover}
+.camp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 6px}
+.camp-choice{display:grid;justify-items:center;gap:3px;min-width:0}
+.camp-choice span{font-size:10px;color:#bfcbd4;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:600px){.camp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

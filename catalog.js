@@ -370,3 +370,6 @@ export const CATALOG = [
     "art": {}
   }
 ];
+// Camps: one per unit type for each player, same artwork for both colours.
+// On the board they sit above the map and paint but under rulers and units.
+for(const t of CATALOG.filter(t=>t.kind==='unit'))CATALOG.push({id:`camp-${t.id}`,name:`${t.name} Camp`,icon:t.icon,short:`${t.short} camp`,kind:'camp',art:{red1:`assets/camp-${t.id}.png?v=0.2.24`,blue1:`assets/camp-${t.id}.png?v=0.2.24`}});
