@@ -173,3 +173,15 @@
 .camp-choice{display:grid;justify-items:center;gap:3px;min-width:0}
 .camp-choice span{font-size:10px;color:#bfcbd4;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:600px){.camp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v0.2.26 Fog of War: an opaque, slowly drifting cloud over every tile this player's units can't see.
+   It sits above the map, paint and camps but below rulers and units. */
+.fog-layer{position:absolute;left:var(--cell);top:var(--cell);width:calc(var(--cell)*31);height:calc(var(--cell)*21);z-index:2;overflow:hidden;pointer-events:none;display:none;background:#56636c;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.fog-layer.active{display:block}
+.fog-drift,.fog-drift::after{position:absolute;inset:-30%;background-repeat:repeat;will-change:transform}
+.fog-drift{background-color:#5b6870;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='n' filterUnits='userSpaceOnUse' x='0' y='0' width='360' height='360'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.86  0 0 0 0 0.9  0 0 0 0 0.93  0 0 0 1.1 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:360px 360px;animation:fogDriftA 70s ease-in-out infinite alternate}
+.fog-drift::after{content:'';inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n' filterUnits='userSpaceOnUse' x='0' y='0' width='260' height='260'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.75  0 0 0 0 0.8  0 0 0 0 0.86  0 0 0 0.9 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:260px 260px;animation:fogDriftB 45s ease-in-out infinite alternate}
+@keyframes fogDriftA{from{transform:translate(0,0)}to{transform:translate(9%,5%)}}
+@keyframes fogDriftB{from{transform:translate(0,0)}to{transform:translate(-7%,4%)}}
+@media(prefers-reduced-motion:reduce){.fog-drift,.fog-drift::after{animation:none}}
+#fogToggle.active{background:#3a4a56;color:var(--gold)}

@@ -2,6 +2,34 @@ import {CATALOG} from './catalog.js';
 export const WIDTH=31,HEIGHT=21;
 export const wallMaxHP=type=>type==='woodwall'?3:type==='stonewall'?6:null;
 export const wallHP=p=>p.hp===undefined?wallMaxHP(p.type):p.hp;
+const unitTypes=new Set(CATALOG.filter(t=>t.kind==='unit').map(t=>t.id));
+export const isUnit=p=>unitTypes.has(p.type);
+// ---- Fog of War vision ----
+// Each of a team's units on the board (not defeated or captured) sees a square of FOG_RADIUS tiles
+// around itself. Walls block sight: a wall tile itself can be seen, but not the tiles behind it.
+// Walls at 0 HP are rubble and no longer block.
+export const FOG_RADIUS=3;
+function sightLine(ax,ay,bx,by,blockers){
+ const steps=Math.max(Math.abs(bx-ax),Math.abs(by-ay))*8;
+ for(let i=1;i<steps;i++){
+  const x=Math.floor(ax+.5+(bx-ax)*i/steps),y=Math.floor(ay+.5+(by-ay)*i/steps);
+  if((x===ax&&y===ay)||(x===bx&&y===by))continue;
+  if(blockers.has(`${x},${y}`))return false;
+ }
+ return true;
+}
+export function visibleTiles(board,team){
+ const blockers=new Set(),seen=new Set();
+ for(const p of board.pieces)if(p.x!==null&&['woodwall','stonewall','ironwall'].includes(p.type)&&wallHP(p)!==0)
+  for(let dx=0;dx<p.w;dx++)for(let dy=0;dy<p.h;dy++)blockers.add(`${p.x+dx},${p.y+dy}`);
+ for(const u of board.pieces){
+  if(u.team!==team||u.x===null||!isUnit(u)||u.status==='defeated'||u.status==='captured')continue;
+  for(let y=Math.max(0,u.y-FOG_RADIUS);y<=Math.min(HEIGHT-1,u.y+FOG_RADIUS);y++)
+   for(let x=Math.max(0,u.x-FOG_RADIUS);x<=Math.min(WIDTH-1,u.x+FOG_RADIUS);x++)
+    if(!seen.has(`${x},${y}`)&&sightLine(u.x,u.y,x,y,blockers))seen.add(`${x},${y}`);
+ }
+ return seen;
+}
 export function saveFilename(code,date=new Date()){
  const pad=n=>String(n).padStart(2,'0');
  return `Kings_Grid_${code}_${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.json`;

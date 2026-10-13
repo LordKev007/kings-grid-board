@@ -174,7 +174,7 @@ async function commitStroke(s){
 el('rulerRadius').oninput=()=>{if(rulerOrigin)setRulerOrigin(rulerOrigin.x,rulerOrigin.y);};
 el('rulerScope').onchange=()=>{if(rulerOrigin)setRulerOrigin(rulerOrigin.x,rulerOrigin.y);};
 function graphic(t,colour,n){const path=t.art?.[colour+n];if(path){const im=document.createElement('img');im.src=path;im.alt=`${colour} ${t.name} ${n}`;im.draggable=false;im.className='token-art';return im;}const s=document.createElement('span');s.className='placeholder';s.textContent=t.id==='cannon'?'CANNON':`${t.icon} ${n}`;s.title=`${t.name} ${n} — placeholder`;return s;}
-function trayToken(t,n){const existing=room.board.pieces.find(p=>p.type===t.id&&p.team===team&&p.copyNo===n);const b=button('',()=>{if(!editable())return toast('Reconnect, or click Not ready to edit setup.');if(existing){selected=existing.id;placing=null;}else{placing={type:t.id,copyNo:n};selected=null;}render();},'tray-token '+team+(existing?' used':''));const label=t.kind==='camp'?t.name:`${t.name} ${n}`;b.title=`${label}${existing?' (already placed)':''}`;b.setAttribute('aria-label',label);b.append(graphic(t,team,n));b.draggable=true;b.ondragstart=e=>{if(!editable()){e.preventDefault();return;}dragData=existing?{id:existing.id}:{type:t.id,copyNo:n};e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';dragStarted();};b.ondragend=dragFinished;return b;}
+function trayToken(t,n){const existing=room.board.pieces.find(p=>p.type===t.id&&p.team===team&&p.copyNo===n),fogged=!existing&&!!room.hiddenOwn?.some(h=>h.type===t.id&&h.copyNo===n);const b=button('',()=>{if(fogged)return toast('That piece is on the board, out of sight in the fog.');if(!editable())return toast('Reconnect, or click Not ready to edit setup.');if(existing){selected=existing.id;placing=null;}else{placing={type:t.id,copyNo:n};selected=null;}render();},'tray-token '+team+(existing||fogged?' used':''));const label=t.kind==='camp'?t.name:`${t.name} ${n}`;b.title=`${label}${existing?' (already placed)':''}`;b.setAttribute('aria-label',label);b.append(graphic(t,team,n));b.draggable=true;b.ondragstart=e=>{if(!editable()||fogged){e.preventDefault();return;}dragData=existing?{id:existing.id}:{type:t.id,copyNo:n};e.dataTransfer.setData('application/json',JSON.stringify(dragData));e.dataTransfer.effectAllowed='move';dragStarted();};b.ondragend=dragFinished;return b;}
 function renderCatalog(){el('ownTeam').textContent=`${team.toUpperCase()} PIECES`;el('ownTeam').className='teamchoices '+team+'text';const list=el('catalog');list.replaceChildren();const q=el('search').value.toLowerCase(),match=t=>t.name.toLowerCase().includes(q);
  for(const t of CATALOG.filter(t=>t.kind!=='camp'&&!['base','giving'].includes(t.id)&&match(t))){const row=document.createElement('div');row.className='catalog-row';const label=document.createElement('span');label.textContent=t.name;row.append(label);const tokens=document.createElement('div');tokens.className='token-row';for(let n=1;n<=(['unit1','cannon'].includes(t.id)?1:3);n++)tokens.append(trayToken(t,n));row.append(tokens);list.append(row);}
  // Camps: one of each per player, in a compact grid under the pieces.
@@ -198,7 +198,7 @@ function boardTap(pos,{shift=false,pieceId=null}={}){
 }
 // Keyboard activation of a cell button (Enter/Space) arrives as a click with detail 0. Mouse clicks are handled by the pointer router.
 el('board').addEventListener('click',e=>{if(e.detail!==0||!room)return;const c=e.target.closest('.cell');if(c)boardTap({x:Number(c.dataset.x),y:Number(c.dataset.y)},{shift:e.shiftKey});});
-el('board').ondragover=e=>{if(!editable())return;e.preventDefault();e.dataTransfer.dropEffect='move';const pos=squareFrom(e);if(pos&&dragData?.id&&Date.now()-lastDrag>90){lastDrag=Date.now();if(!local&&room.phase==='play'&&socket?.readyState===1)socket.send(JSON.stringify({kind:'drag',id:dragData.id,...pos}));}};
+el('board').ondragover=e=>{if(!editable())return;e.preventDefault();e.dataTransfer.dropEffect='move';const pos=squareFrom(e);if(pos&&dragData?.id&&Date.now()-lastDrag>90){lastDrag=Date.now();if(!local&&room.phase==='play'&&!room.fog&&socket?.readyState===1)socket.send(JSON.stringify({kind:'drag',id:dragData.id,...pos}));}};
 el('board').ondrop=e=>{e.preventDefault();const pos=squareFrom(e);let data=dragData;try{data=data||JSON.parse(e.dataTransfer.getData('application/json'));}catch{}dragFinished();if(pos&&data)place(data,pos.x,pos.y);};
 let wallClick=null;
 function showWallHealth(p,d){
@@ -226,7 +226,26 @@ function renderWallEditor(board){
  for(const name of ['click','dblclick','pointerdown','keydown','keyup'])panel.addEventListener(name,e=>e.stopPropagation());
  panel.addEventListener('dragstart',e=>{e.preventDefault();e.stopPropagation();});board.append(panel);
 }
-function renderBoard(){const board=el('board'),next=new Map();for(const child of [...board.children])if(child.id!=='mapLayer')child.remove();renderMap();
+// ---- Fog of War ----
+// The server only sends what this player's units can see (room.visible). Every other tile is covered
+// by one animated fog layer, cut to shape with a mask built from the hidden tiles.
+function renderFog(){
+ const layer=el('fogLayer'),on=!!room?.fog&&room.phase==='play'&&Array.isArray(room.visible);
+ layer.classList.toggle('active',on);if(!on)return;
+ const seen=new Set(room.visible);let rects='';
+ for(let vy=0;vy<HEIGHT;vy++){let run=-1;
+  for(let vx=0;vx<=WIDTH;vx++){
+   const v=vx<WIDTH?view(vx,vy):null,hidden=vx<WIDTH&&!seen.has(`${v.x},${v.y}`);
+   if(hidden&&run<0)run=vx;
+   if(!hidden&&run>=0){rects+=`<rect x='${run-.15}' y='${vy-.15}' width='${vx-run+.3}' height='1.3'/>`;run=-1;}
+  }
+ }
+ // view() maps board tiles to screen tiles; it is its own inverse, so it also finds the board tile for a screen tile.
+ const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${WIDTH} ${HEIGHT}' preserveAspectRatio='none'><filter id='s' x='-0.05' y='-0.05' width='1.1' height='1.1'><feGaussianBlur stdDeviation='0.1'/></filter><g fill='white' filter='url(%23s)'>${rects}</g></svg>`;
+ const url=`url("data:image/svg+xml,${svg.replace(/"/g,"'").replace(/</g,'%3C').replace(/>/g,'%3E')}")`;
+ layer.style.maskImage=url;layer.style.webkitMaskImage=url;
+}
+function renderBoard(){const board=el('board'),next=new Map();for(const child of [...board.children])if(child.id!=='mapLayer'&&child.id!=='fogLayer')child.remove();renderMap();renderFog();
  for(let x=0;x<WIDTH;x++){const a=document.createElement('span');a.className='axis';a.textContent=coord(flipped?WIDTH-1-x:x,0).replace(/\d/g,'');a.style.left=`${(x+1)*cell}px`;a.style.top='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++){const a=document.createElement('span');a.className='axis';a.textContent=String(flipped?HEIGHT-y:y+1);a.style.top=`${(y+1)*cell}px`;a.style.left='0';board.append(a);}
  for(let y=0;y<HEIGHT;y++)for(let x=0;x<WIDTH;x++){const v=view(x,y),b=document.createElement('button');b.className='cell'+((x+y)%2?' alt':'');b.style.left=`${(v.x+1)*cell}px`;b.style.top=`${(v.y+1)*cell}px`;b.dataset.x=x;b.dataset.y=y;b.setAttribute('role','gridcell');b.setAttribute('aria-label',coord(x,y));board.append(b);}
@@ -248,7 +267,7 @@ function render(){if(!room)return;if(selected&&!room.board.pieces.some(p=>p.id==
  el('fullscreen').hidden=room.phase!=='play';el('setupActions').hidden=room.phase!=='setup';el('ready').hidden=room.phase!=='setup';el('ready').textContent=room.ready[team]?'Not ready · edit setup':'Ready';el('pass').hidden=true;
  el('turnLabel').textContent=room.phase==='setup'?`Private setup · ${other(team)} ${room.ready[other(team)]?'ready':'not ready'}`:'Open movement · both players may move';
  el('counts').textContent=room.phase==='setup'?`${room.board.pieces.filter(p=>p.x!==null).length} of your pieces on board · opponent hidden`:`${room.board.pieces.filter(p=>p.x!==null).length} pieces on board`;
- el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play';el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
+ el('undo').disabled=!room.canUndo||!editable();el('export').disabled=room.phase!=='play'||!!room.fog;el('fogToggle').classList.toggle('active',!!room.fog);el('fogToggle').setAttribute('aria-pressed',String(!!room.fog));el('reserves').replaceChildren();const reserve=room.board.pieces.filter(p=>p.x===null&&p.team===team);el('reserveCount').textContent=`(${reserve.length})`;for(const p of reserve)el('reserves').append(button(p.label,()=>{selected=p.id;placing=null;render();}));
  const p=room.board.pieces.find(p=>p.id===selected);el('selection').hidden=!p;updateHint();
  if(p){el('selectedName').textContent=(CATALOG.find(t=>t.id===p.type)||{id:p.type,name:'Retired unit',icon:'✧',art:{}}).name;el('selectedCoord').textContent=p.x===null?'In reserve':coord(p.x,p.y);el('label').value=p.label;el('pieceStatus').value=p.status;for(const id of ['label','pieceStatus','savePiece','rotate','reservePiece','remove'])el(id).disabled=p.team!==team||!editable();el('rotate').disabled=!editable()||p.fixed||(p.team!==team&&(room.phase!=='play'||!p.type.endsWith('wall')));el('stack').replaceChildren();if(p.x!==null&&at(p.x,p.y).length>1)for(const a of at(p.x,p.y))el('stack').append(button(a.label,()=>{selected=a.id;render();},a.id===p.id?'active':''));}
  el('log').replaceChildren();for(const item of room.history){const p=document.createElement('p');p.textContent=item.text;el('log').append(p);}
@@ -290,6 +309,7 @@ document.addEventListener('keydown',e=>{
 },true);
 document.addEventListener('keyup',e=>{if(cursorKeys.has(e.key))cursorKeys.delete(e.key);},true);
 el('undo').onclick=()=>act({kind:'undo'});
+el('fogToggle').onclick=()=>{if(!room)return;if(room.fog&&!confirm('Turn off Fog of War? This reveals the whole board to both players.'))return;act({kind:'fog',on:!room.fog});};
 el('clear').onclick=()=>{if(confirm('Return all YOUR pieces to the tray?'))act({kind:'clear'});};
 el('reset').onclick=()=>{if(confirm('Reset the entire table for a new setup? This clears both armies from the board.')){selected=null;placing=null;act({kind:'reset'});}};
 el('export').onclick=()=>{const b=new Blob([JSON.stringify({format:'kings-grid-board-v2',savedAt:new Date().toISOString(),board:room.board},null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=saveFilename(room.code);a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
