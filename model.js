@@ -8,7 +8,7 @@ export const isUnit=p=>unitTypes.has(p.type);
 // Each of a team's units on the board (not defeated or captured) sees a square of FOG_RADIUS tiles
 // around itself. Walls block sight: a wall tile itself can be seen, but not the tiles behind it.
 // Walls at 0 HP are rubble and no longer block.
-export const FOG_RADIUS=3;
+export const FOG_RADIUS=2;
 function sightLine(ax,ay,bx,by,blockers){
  const steps=Math.max(Math.abs(bx-ax),Math.abs(by-ay))*8;
  for(let i=1;i<steps;i++){

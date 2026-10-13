@@ -80,9 +80,17 @@ function update(r){if(room&&r.revision<room.revision)return;room=r;team=r.myTeam
 function dragStarted(){nativeDrag=true;}
 function dragFinished(){dragData=null;if(!nativeDrag)return;nativeDrag=false;if(renderDeferred){renderDeferred=false;render();}}
 function editable(){return room&&((room.phase==='setup'&&!room.ready[team])||room.phase==='play')&&(local||connected);}
+// The server refuses an edit (409) if the other player changed the board in the same moment. Both
+// players move freely, so for ordinary edits that's just a race: the refused request already brought
+// back the latest board, so resend on it. Edits that wipe or rewind the board still stop and show the message.
+const NO_AUTO_RETRY=new Set(['undo','reset','clear','import','clearPaint']);
 async function command(action){
  if(local){applyAction(localState,team,action);write('kg-board-v2-local',localState);return publicRoom(localState,team);}
- const payload={requestId:uuid(),revision:room.revision,action};let d;try{d=await request(`/api/rooms/${session.code}/command`,{body:payload});}catch(e){if(e.name==='AbortError'||e instanceof TypeError)d=await request(`/api/rooms/${session.code}/command`,{body:payload});else throw e;}return d.room;
+ for(let attempt=0;;attempt++){
+  const payload={requestId:uuid(),revision:room.revision,action};
+  try{let d;try{d=await request(`/api/rooms/${session.code}/command`,{body:payload});}catch(e){if(e.name==='AbortError'||e instanceof TypeError)d=await request(`/api/rooms/${session.code}/command`,{body:payload});else throw e;}return d.room;}
+  catch(e){if(e.status===409&&attempt<2&&!NO_AUTO_RETRY.has(action.kind))continue;throw e;}
+ }
 }
 async function act(action){if(busy)return toast('Wait for the current edit to finish.');if(!local&&!connected)return toast('Reconnecting—editing is paused.');busy=true;
  try{update(await command(action));return true;
@@ -165,8 +173,7 @@ async function commitStroke(s){
  busy=true;
  try{
   if(!local&&!connected)throw Error('Reconnecting—that paint stroke was not saved.');
-  // Paint is "set these tiles", so if the other player changed the board meanwhile, resend on the new revision.
-  let r;try{r=await command(action);}catch(e){if(e.status!==409)throw e;r=await command(action);}
+  const r=await command(action);
   pendingStrokes=pendingStrokes.filter(x=>x!==s);update(r);
  }catch(e){pendingStrokes=pendingStrokes.filter(x=>x!==s);toast(e.message);if(room)renderBoard();}
  finally{busy=false;}
@@ -228,7 +235,7 @@ function renderWallEditor(board){
 }
 // ---- Fog of War ----
 // The server only sends what this player's units can see (room.visible). Every other tile is covered
-// by one animated fog layer, cut to shape with a mask built from the hidden tiles.
+// by one black fog layer with faint grid lines, cut to shape with a mask built from the hidden tiles.
 function renderFog(){
  const layer=el('fogLayer'),on=!!room?.fog&&room.phase==='play'&&Array.isArray(room.visible);
  layer.classList.toggle('active',on);if(!on)return;
@@ -237,11 +244,11 @@ function renderFog(){
   for(let vx=0;vx<=WIDTH;vx++){
    const v=vx<WIDTH?view(vx,vy):null,hidden=vx<WIDTH&&!seen.has(`${v.x},${v.y}`);
    if(hidden&&run<0)run=vx;
-   if(!hidden&&run>=0){rects+=`<rect x='${run-.15}' y='${vy-.15}' width='${vx-run+.3}' height='1.3'/>`;run=-1;}
+   if(!hidden&&run>=0){rects+=`<rect x='${run}' y='${vy}' width='${vx-run}' height='1'/>`;run=-1;}
   }
  }
  // view() maps board tiles to screen tiles; it is its own inverse, so it also finds the board tile for a screen tile.
- const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${WIDTH} ${HEIGHT}' preserveAspectRatio='none'><filter id='s' x='-0.05' y='-0.05' width='1.1' height='1.1'><feGaussianBlur stdDeviation='0.1'/></filter><g fill='white' filter='url(%23s)'>${rects}</g></svg>`;
+ const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${WIDTH} ${HEIGHT}' preserveAspectRatio='none'><g fill='white' shape-rendering='crispEdges'>${rects}</g></svg>`;
  const url=`url("data:image/svg+xml,${svg.replace(/"/g,"'").replace(/</g,'%3C').replace(/>/g,'%3E')}")`;
  layer.style.maskImage=url;layer.style.webkitMaskImage=url;
 }
